@@ -149,13 +149,16 @@ public class ExamplesTestIT {
         File hibernatePropertiesFile = new File(projectResourcesFolder, "hibernate.properties");
         assertFalse(hibernatePropertiesFile.exists());
         String hibernatePropertiesFileContents =
-                "hibernate.connection.driver_class=org.h2.Driver\n" +
-                        "hibernate.connection.url=" + constructJdbcConnectionString() + "\n" +
-                        "hibernate.connection.username=\n" +
-                        "hibernate.connection.password=\n" +
-                        "hibernate.default_catalog=TEST\n" +
-                        "hibernate.default_schema=PUBLIC\n";
+                "hibernate.connection.driver_class=org.h2.Driver"               + System.lineSeparator() +
+                "hibernate.connection.url=" + constructJdbcConnectionString()   + System.lineSeparator() +
+                "hibernate.connection.username="                                + System.lineSeparator() +
+                "hibernate.connection.password="                                + System.lineSeparator() +
+                "hibernate.default_catalog=TEST"                                + System.lineSeparator() +
+                "hibernate.default_schema=PUBLIC"                               + System.lineSeparator();
         Files.writeString(hibernatePropertiesFile.toPath(), hibernatePropertiesFileContents);
+        System.out.println("************* createHibernatePropertiesFile **************");
+        System.out.println("Result =>");
+        System.out.println(hibernatePropertiesFileContents);
         assertTrue(hibernatePropertiesFile.exists());
     }
 
@@ -225,7 +228,12 @@ public class ExamplesTestIT {
     }
 
     private String constructJdbcConnectionString() {
-        return "jdbc:h2:" + tempFolder.getAbsolutePath() + "/database/test;AUTO_SERVER=TRUE";
+        String result = "jdbc:h2:"
+                + tempFolder.getAbsolutePath().replace('\\', '/') // for tests on Windows
+                + "/database/test;AUTO_SERVER=TRUE";
+        System.out.println("********** constructJdbcConnectionString() ************");
+        System.out.println("Result => " + result);
+        return result;
     }
 
 }
