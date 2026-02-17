@@ -93,8 +93,7 @@
         <module>ant</module>
         <module>test</module>
         <module>utils</module>
-        <!-- module 'language' is excluded because of failing dependency on junit 6.0.1
-        <module>language</module> -->
+        <module>language</module>
     </modules>
 
     <properties>
