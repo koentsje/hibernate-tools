@@ -28,13 +28,14 @@ public class ResourceUtil {
 	public static void createResources(Object test, String[] resources, File resourcesDir) {
 		try {
 			for (String resource : resources) {
-				InputStream inputStream = resolveResourceLocation(test.getClass(), resource);
-				File resourceFile = new File(resourcesDir, resource);
-				File parent = resourceFile.getParentFile();
-				if (!parent.exists()) {
-					parent.mkdirs();
+				try (InputStream inputStream = resolveResourceLocation(test.getClass(), resource)) {
+					File resourceFile = new File(resourcesDir, resource);
+					File parent = resourceFile.getParentFile();
+					if (!parent.exists()) {
+						parent.mkdirs();
+					}
+					Files.copy(inputStream, resourceFile.toPath());
 				}
-				Files.copy(inputStream, resourceFile.toPath());
 			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);
