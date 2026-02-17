@@ -28,15 +28,13 @@ public class FileUtil {
 
 	static public String findFirstString(String string, File file) {
 		String str;
-		try {
-	        BufferedReader in = new BufferedReader(new FileReader(file) );
+		try (BufferedReader in = new BufferedReader(new FileReader(file))) {
 	        while ( (str = in.readLine() ) != null ) {
 	            if(str.indexOf(string)>=0) {
 					break;
 	            }
 	        }
-	        in.close();	        
-	    } 
+	    }
 		catch (IOException e) {
 			throw new RuntimeException("trouble with searching in " + file,e);
 	    }
