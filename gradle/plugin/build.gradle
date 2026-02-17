@@ -13,7 +13,7 @@ project.version = "$projectVersion"
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(11)
+        languageVersion = JavaLanguageVersion.of(17)
     }
 }
 
@@ -80,6 +80,10 @@ tasks.named('publishPlugins') {
         def isDryRun = System.getenv('JRELEASER_DRY_RUN')
         !Boolean.parseBoolean(isDryRun)
     }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.release = 11
 }
 
 tasks.withType(Test) {
