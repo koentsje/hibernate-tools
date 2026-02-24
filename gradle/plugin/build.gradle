@@ -84,8 +84,36 @@ tasks.register('functionalTest', Test) {
 
 gradlePlugin.testSourceSets.add(sourceSets.functionalTest)
 
+def gradleTestVersionsList = findProperty('gradleTestVersions')?.split(',')?.collect { it.trim() } ?: []
+
+def javaToolchains = project.extensions.getByType(JavaToolchainService)
+def jdkLauncher = javaToolchains.launcherFor {
+    languageVersion = JavaLanguageVersion.of(Integer.parseInt(gradleTestJavaVersion))
+}
+
+gradleTestVersionsList.each { gradleVersion ->
+    def taskName = 'functionalTest_' + gradleVersion.replace('.', '_')
+    tasks.register(taskName, Test) {
+        testClassesDirs = sourceSets.functionalTest.output.classesDirs
+        classpath = sourceSets.functionalTest.runtimeClasspath
+        useJUnitPlatform()
+        environment("HIBERNATE_TOOLS_VERSION", projectVersion)
+        environment("H2_VERSION", h2Version)
+        systemProperty 'gradle.test.version', gradleVersion
+        systemProperty 'gradle.test.java.home', jdkLauncher.get().metadata.installationPath.asFile.absolutePath
+    }
+}
+
+tasks.register('functionalTestAll') {
+    dependsOn tasks.named('functionalTest')
+    gradleTestVersionsList.each { gradleVersion ->
+        def taskName = 'functionalTest_' + gradleVersion.replace('.', '_')
+        dependsOn tasks.named(taskName)
+    }
+}
+
 tasks.named('check') {
-    dependsOn(tasks.functionalTest)
+    dependsOn(tasks.functionalTestAll)
 }
 
 tasks.named('test') {

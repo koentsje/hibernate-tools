@@ -187,6 +187,8 @@
                                 <argument>build</argument>
                                 <argument>-PprojectVersion=${project.version}</argument>
                                 <argument>-Ph2Version=${h2.version}</argument>
+                                <argument>-PgradleTestVersions=${gradle.min.test.version}</argument>
+                                <argument>-PgradleTestJavaVersion=${maven.compiler.release}</argument>
                                 <argument>-Dmaven.repo.local=${settings.localRepository}</argument>
                                 <argument>-PmavenRootDirectory=${rootProject.directory}</argument>
                             </arguments>
@@ -204,6 +206,8 @@
                                 <argument>clean</argument>
                                 <argument>-PprojectVersion=${project.version}</argument>
                                 <argument>-Ph2Version=${h2.version}</argument>
+                                <argument>-PgradleTestVersions=${gradle.min.test.version}</argument>
+                                <argument>-PgradleTestJavaVersion=${maven.compiler.release}</argument>
                             </arguments>
                         </configuration>
                         <goals>
