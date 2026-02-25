@@ -29,7 +29,7 @@ pipeline {
 		maven 'Apache Maven 3.9'
 		jdk 'OpenJDK 21 Latest'
 	}
-	environment {git
+	environment {
 		OPENJDK_11_LATEST_HOME = tool name: 'OpenJDK 11 Latest', type: 'jdk'
 	}
 	options {
