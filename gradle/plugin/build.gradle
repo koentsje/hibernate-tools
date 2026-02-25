@@ -11,12 +11,6 @@ group = 'org.hibernate.tool'
 project.description = 'Gradle plugin to provide hibernate-tools reverse engineering and code/schema generation abilities.'
 project.version = "$projectVersion"
 
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(11)
-    }
-}
-
 repositories {
     mavenCentral()
     mavenLocal()
@@ -82,7 +76,7 @@ tasks.named('publishPlugins') {
     }
 }
 
-tasks.withType(JavaCompile).configureEach {
+tasks.named('compileJava') {
     options.release = 11
 }
 
