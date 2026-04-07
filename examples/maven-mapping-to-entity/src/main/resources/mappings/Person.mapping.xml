@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns="http://www.hibernate.org/xsd/orm/mapping" version="8.0">
+
+    <entity class="com.example.model.Person">
+        <table name="PERSON"/>
+        <attributes>
+            <id name="id">
+                <column name="ID"/>
+                <generated-value strategy="IDENTITY"/>
+            </id>
+            <basic name="firstName">
+                <column name="FIRST_NAME" nullable="false" length="100"/>
+            </basic>
+            <basic name="lastName">
+                <column name="LAST_NAME" nullable="false" length="100"/>
+            </basic>
+            <basic name="email">
+                <column name="EMAIL" length="255"/>
+            </basic>
+            <one-to-many name="addresses" mapped-by="person">
+                <cascade>
+                    <cascade-all/>
+                </cascade>
+            </one-to-many>
+        </attributes>
+    </entity>
+
+</entity-mappings>

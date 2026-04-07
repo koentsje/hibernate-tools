@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.hibernate.tool.examples</groupId>
+    <artifactId>maven-reveng-example</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <name>Hibernate Tools Maven Plugin - Reverse Engineering Example</name>
+    <description>
+        Demonstrates how to use the hibernate-tools-maven plugin to
+        reverse-engineer a database schema into different output formats
+        and to transform existing hbm.xml mappings into JPA mapping.xml.
+
+        Run with:  mvn clean generate-sources generate-resources
+    </description>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.release>21</maven.compiler.release>
+        <hibernate-tools.version>8.0.0-SNAPSHOT</hibernate-tools.version>
+        <h2.version>2.4.240</h2.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>${h2.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+
+            <!--
+                Step 0: Create the database schema.
+                Uses the sql-maven-plugin to execute DDL against a file-based H2 database.
+            -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>sql-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.h2database</groupId>
+                        <artifactId>h2</artifactId>
+                        <version>${h2.version}</version>
+                    </dependency>
+                </dependencies>
+                <executions>
+                    <execution>
+                        <id>create-schema</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>execute</goal>
+                        </goals>
+                        <configuration>
+                            <driver>org.h2.Driver</driver>
+                            <url>jdbc:h2:${project.build.directory}/exampledb</url>
+                            <autocommit>true</autocommit>
+                            <srcFiles>
+                                <srcFile>src/main/resources/schema.sql</srcFile>
+                            </srcFiles>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!--
+                Steps 1-4: Reverse-engineer the database and transform hbm.xml.
+            -->
+            <plugin>
+                <groupId>org.hibernate.tool</groupId>
+                <artifactId>hibernate-tools-maven</artifactId>
+                <version>${hibernate-tools.version}</version>
+                <executions>
+
+                    <!--
+                        Step 1: hbm2java - Generate annotated Java entities.
+                        Reads the database schema and produces @Entity classes with
+                        @Table, @Id, @Column, @ManyToOne, @OneToMany, etc.
+                        Output: target/generated-sources/*.java
+                    -->
+                    <execution>
+                        <id>generate-entities</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>hbm2java</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
+                            <ejb3>true</ejb3>
+                            <jdk5>true</jdk5>
+                        </configuration>
+                    </execution>
+
+                    <!--
+                        Step 2: generateHbm - Generate hbm.xml mapping files.
+                        Reads the same database schema and produces Hibernate
+                        native mapping files (one per entity).
+                        Output: target/generated-hbm/*.hbm.xml
+                    -->
+                    <execution>
+                        <id>generate-hbm</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>generateHbm</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/generated-hbm</outputDirectory>
+                        </configuration>
+                    </execution>
+
+                    <!--
+                        Step 3: generateMapping - Generate JPA mapping.xml files
+                        directly from the database.
+                        Like hbm2java and generateHbm, this reads the live database
+                        and produces one mapping.xml file per entity.
+                        Output: target/generated-mapping/*.mapping.xml
+                    -->
+                    <execution>
+                        <id>generate-mapping</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>generateMapping</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/generated-mapping</outputDirectory>
+                        </configuration>
+                    </execution>
+
+                    <!--
+                        Step 4: hbm2orm - Transform hbm.xml into JPA mapping.xml.
+                        This goal does NOT connect to the database. It reads .hbm.xml
+                        files from the inputFolder and produces .mapping.xml files
+                        alongside them.
+
+                        Here we point it at hand-written hbm.xml files in
+                        src/main/resources/hbm/ to demonstrate the transformation
+                        from the legacy Hibernate mapping format to JPA mapping.xml.
+                        Output: src/main/resources/hbm/*.mapping.xml
+                    -->
+                    <execution>
+                        <id>transform-hbm-to-orm</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>hbm2orm</goal>
+                        </goals>
+                        <configuration>
+                            <inputFolder>${project.basedir}/src/main/resources/hbm</inputFolder>
+                        </configuration>
+                    </execution>
+
+                </executions>
+            </plugin>
+
+        </plugins>
+    </build>
+
+</project>

@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "https://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+    <class name="com.example.Person" table="PERSON">
+
+        <id name="id" type="java.lang.Long">
+            <column name="ID"/>
+            <generator class="identity"/>
+        </id>
+
+        <property name="firstName" type="string">
+            <column name="FIRST_NAME" not-null="true" length="100"/>
+        </property>
+
+        <property name="lastName" type="string">
+            <column name="LAST_NAME" not-null="true" length="100"/>
+        </property>
+
+        <property name="email" type="string">
+            <column name="EMAIL" length="255"/>
+        </property>
+
+        <property name="birthDate" type="date">
+            <column name="BIRTH_DATE"/>
+        </property>
+
+        <set name="items" inverse="true">
+            <key column="OWNER_ID"/>
+            <one-to-many class="com.example.Item"/>
+        </set>
+
+    </class>
+</hibernate-mapping>
