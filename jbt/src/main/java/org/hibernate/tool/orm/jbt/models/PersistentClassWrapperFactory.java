@@ -155,6 +155,10 @@ public class PersistentClassWrapperFactory {
 			this.modelsContext = modelsContext;
 		}
 
+		public EntityKind getEntityKind() {
+			return entityKind;
+		}
+
 		@Override
 		public Object getWrappedObject() {
 			return classDetails;
