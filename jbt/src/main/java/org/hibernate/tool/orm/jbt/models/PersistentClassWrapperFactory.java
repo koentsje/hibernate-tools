@@ -101,6 +101,14 @@ public class PersistentClassWrapperFactory {
 				DummyModelsContext.INSTANCE);
 	}
 
+	public static PersistentClassWrapper createPersistentClassWrapper(
+			org.hibernate.mapping.PersistentClass persistentClass) {
+		PersistentClassWrapperImpl wrapper = (PersistentClassWrapperImpl) createRootClassWrapper();
+		wrapper.setEntityName(persistentClass.getEntityName());
+		wrapper.setClassName(persistentClass.getClassName());
+		return wrapper;
+	}
+
 	public static class PersistentClassWrapperImpl
 			implements PersistentClassWrapper {
 

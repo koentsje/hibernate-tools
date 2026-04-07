@@ -31,7 +31,7 @@ import org.hibernate.tool.orm.jbt.api.wrp.ForeignKeyWrapper;
 import org.hibernate.tool.orm.jbt.api.wrp.PrimaryKeyWrapper;
 import org.hibernate.tool.orm.jbt.api.wrp.TableWrapper;
 import org.hibernate.tool.orm.jbt.api.wrp.ValueWrapper;
-import org.hibernate.tool.orm.jbt.internal.factory.ValueWrapperFactory;
+import org.hibernate.tool.orm.jbt.models.ValueWrapperFactory;
 import org.hibernate.tool.orm.jbt.models.TableWrapperFactory.TableWrapperImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

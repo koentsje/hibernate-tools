@@ -27,36 +27,36 @@ import org.hibernate.tool.orm.jbt.api.wrp.PropertyWrapper;
 import org.hibernate.tool.orm.jbt.api.wrp.RevengStrategyWrapper;
 import org.hibernate.tool.orm.jbt.api.wrp.TableWrapper;
 import org.hibernate.tool.orm.jbt.api.wrp.ValueWrapper;
-import org.hibernate.tool.orm.jbt.internal.factory.ArtifactCollectorWrapperFactory;
-import org.hibernate.tool.orm.jbt.internal.factory.Cfg2HbmToolWrapperFactory;
-import org.hibernate.tool.orm.jbt.internal.factory.ColumnWrapperFactory;
-import org.hibernate.tool.orm.jbt.internal.factory.ConfigurationWrapperFactory;
-import org.hibernate.tool.orm.jbt.internal.factory.DatabaseReaderWrapperFactory;
-import org.hibernate.tool.orm.jbt.internal.factory.EnvironmentWrapperFactory;
-import org.hibernate.tool.orm.jbt.internal.factory.ExporterWrapperFactory;
-import org.hibernate.tool.orm.jbt.internal.factory.HbmExporterWrapperFactory;
-import org.hibernate.tool.orm.jbt.internal.factory.HqlCodeAssistWrapperFactory;
-import org.hibernate.tool.orm.jbt.internal.factory.HqlCompletionProposalWrapperFactory;
-import org.hibernate.tool.orm.jbt.internal.factory.NamingStrategyWrapperFactory;
-import org.hibernate.tool.orm.jbt.internal.factory.OverrideRepositoryWrapperFactory;
-import org.hibernate.tool.orm.jbt.internal.factory.PersistentClassWrapperFactory;
-import org.hibernate.tool.orm.jbt.internal.factory.PropertyWrapperFactory;
-import org.hibernate.tool.orm.jbt.internal.factory.RevengSettingsWrapperFactory;
-import org.hibernate.tool.orm.jbt.internal.factory.RevengStrategyWrapperFactory;
-import org.hibernate.tool.orm.jbt.internal.factory.SchemaExportWrapperFactory;
-import org.hibernate.tool.orm.jbt.internal.factory.TableFilterWrapperFactory;
-import org.hibernate.tool.orm.jbt.internal.factory.TableWrapperFactory;
-import org.hibernate.tool.orm.jbt.internal.factory.TypeFactoryWrapperFactory;
-import org.hibernate.tool.orm.jbt.internal.factory.ValueWrapperFactory;
+import org.hibernate.tool.orm.jbt.models.ArtifactCollectorWrapperFactory;
+import org.hibernate.tool.orm.jbt.models.Cfg2HbmToolWrapperFactory;
+import org.hibernate.tool.orm.jbt.models.ColumnWrapperFactory;
+import org.hibernate.tool.orm.jbt.models.ConfigurationWrapperFactory;
+import org.hibernate.tool.orm.jbt.models.DatabaseReaderWrapperFactory;
+import org.hibernate.tool.orm.jbt.models.EnvironmentWrapperFactory;
+import org.hibernate.tool.orm.jbt.models.ExporterWrapperFactory;
+import org.hibernate.tool.orm.jbt.models.HbmExporterWrapperFactory;
+import org.hibernate.tool.orm.jbt.models.HqlCodeAssistWrapperFactory;
+import org.hibernate.tool.orm.jbt.models.HqlCompletionProposalWrapperFactory;
+import org.hibernate.tool.orm.jbt.models.NamingStrategyWrapperFactory;
+import org.hibernate.tool.orm.jbt.models.OverrideRepositoryWrapperFactory;
+import org.hibernate.tool.orm.jbt.models.PersistentClassWrapperFactory;
+import org.hibernate.tool.orm.jbt.models.PropertyWrapperFactory;
+import org.hibernate.tool.orm.jbt.models.RevengSettingsWrapperFactory;
+import org.hibernate.tool.orm.jbt.models.RevengStrategyWrapperFactory;
+import org.hibernate.tool.orm.jbt.models.SchemaExportWrapperFactory;
+import org.hibernate.tool.orm.jbt.models.TableFilterWrapperFactory;
+import org.hibernate.tool.orm.jbt.models.TableWrapperFactory;
+import org.hibernate.tool.orm.jbt.models.TypeFactoryWrapperFactory;
+import org.hibernate.tool.orm.jbt.models.ValueWrapperFactory;
 
 public class WrapperFactory {
-	
+
 	private WrapperFactory() {}
 
 	public static Object createArtifactCollectorWrapper() {
 		return ArtifactCollectorWrapperFactory.createArtifactCollectorWrapper();
 	}
-	
+
 	public static Object createCfg2HbmWrapper() {
 		return Cfg2HbmToolWrapperFactory.createCfg2HbmToolWrapper();
 	}
@@ -64,11 +64,11 @@ public class WrapperFactory {
 	public static Object createNamingStrategyWrapper(String namingStrategyClassName) {
 		return NamingStrategyWrapperFactory.createNamingStrategyWrapper(namingStrategyClassName);
 	}
-	
+
 	public static Object createOverrideRepositoryWrapper() {
 		return OverrideRepositoryWrapperFactory.createOverrideRepositoryWrapper();
 	}
-	
+
 	public static Object createRevengStrategyWrapper(Object...objects) {
 		return RevengStrategyWrapperFactory.createRevengStrategyWrapper(objects);
 	}
@@ -76,11 +76,11 @@ public class WrapperFactory {
 	public static Object createRevengSettingsWrapper(Object revengStrategyWrapper) {
 		return RevengSettingsWrapperFactory.createRevengSettingsWrapper((RevengStrategyWrapper)revengStrategyWrapper);
 	}
-	
+
 	public static Object createNativeConfigurationWrapper() {
 		return ConfigurationWrapperFactory.createNativeConfigurationWrapper();
 	}
-	
+
 	public static Object createRevengConfigurationWrapper() {
 		return ConfigurationWrapperFactory.createRevengConfigurationWrapper();
 	}
@@ -116,7 +116,7 @@ public class WrapperFactory {
 	public static Object createHqlCompletionProposalWrapper(Object hqlCompletionProposal) {
 		return HqlCompletionProposalWrapperFactory.createHqlCompletionProposalWrapper(hqlCompletionProposal);
 	}
-	
+
 	public static Object createArrayWrapper(Object persistentClassWrapper) {
 		return ValueWrapperFactory.createArrayWrapper((PersistentClassWrapper)persistentClassWrapper);
 	}
@@ -128,10 +128,10 @@ public class WrapperFactory {
 	public static Object createListWrapper(Object persistentClassWrapper) {
 		return ValueWrapperFactory.createListWrapper((PersistentClassWrapper)persistentClassWrapper);
 	}
-	
+
 	public static Object createDatabaseReaderWrapper(Properties properties, Object revengStrategyWrapper) {
 		return DatabaseReaderWrapperFactory.createDatabaseReaderWrapper(
-				properties, 
+				properties,
 				(RevengStrategyWrapper)revengStrategyWrapper);
 	}
 
@@ -140,7 +140,7 @@ public class WrapperFactory {
 	}
 
 	public static Object createManyToOneWrapper(Object tableWrapper) {
-		return ValueWrapperFactory.createManyToOneWrapper((TableWrapper)tableWrapper);
+		return ValueWrapperFactory.createManyToOneWrapper();
 	}
 
 	public static Object createMapWrapper(Object persistentClassWrapper) {
@@ -170,17 +170,17 @@ public class WrapperFactory {
 	public static Object createComponentWrapper(Object persistentClassWrapper) {
 		return ValueWrapperFactory.createComponentWrapper((PersistentClassWrapper)persistentClassWrapper);
 	}
-	
+
 	public static Object createDependantValueWrapper(Object tableWrapper, Object valueWrapper) {
 		return ValueWrapperFactory.createDependantValueWrapper((TableWrapper)tableWrapper, (ValueWrapper)valueWrapper);
 	}
 
 	public static Object createAnyValueWrapper(Object tableWrapper) {
-		return ValueWrapperFactory.createAnyValueWrapper((TableWrapper)tableWrapper);
+		return ValueWrapperFactory.createAnyValueWrapper();
 	}
 
 	public static Object createIdentifierBagValueWrapper(Object persistentClassWrapper) {
-		return ValueWrapperFactory.createIdentifierBagValueWrapper((PersistentClassWrapper)persistentClassWrapper);
+		return ValueWrapperFactory.createIdentifierBagWrapper((PersistentClassWrapper)persistentClassWrapper);
 	}
 
 	public static Object createTableFilterWrapper() {
@@ -199,7 +199,7 @@ public class WrapperFactory {
 		return SchemaExportWrapperFactory.createSchemaExportWrapper(
 				(ConfigurationWrapper)configurationWrapper);
 	}
-	
+
 	public static Object createHbmExporterWrapper(Object configurationWrapper, File file) {
 		return HbmExporterWrapperFactory.createHbmExporterWrapper(
 				(ConfigurationWrapper)configurationWrapper, file);
@@ -208,7 +208,7 @@ public class WrapperFactory {
 	public static Object createExporterWrapper(String exporterClassName) {
 		return ExporterWrapperFactory.createExporterWrapper(exporterClassName);
 	}
-	
+
 	public static Object createHqlCodeAssistWrapper(Object configurationWrapper) {
 		return HqlCodeAssistWrapperFactory.createHqlCodeAssistWrapper(
 				(ConfigurationWrapper)configurationWrapper);

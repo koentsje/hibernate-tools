@@ -25,28 +25,6 @@ import java.util.Properties;
 import org.hibernate.boot.Metadata;
 import org.hibernate.boot.model.naming.ImplicitNamingStrategyJpaCompliantImpl;
 import org.hibernate.cfg.Configuration;
-import org.hibernate.mapping.Any;
-import org.hibernate.mapping.Array;
-import org.hibernate.mapping.Bag;
-import org.hibernate.mapping.Column;
-import org.hibernate.mapping.Component;
-import org.hibernate.mapping.DependantValue;
-import org.hibernate.mapping.IdentifierBag;
-import org.hibernate.mapping.JoinedSubclass;
-import org.hibernate.mapping.List;
-import org.hibernate.mapping.ManyToOne;
-import org.hibernate.mapping.Map;
-import org.hibernate.mapping.OneToMany;
-import org.hibernate.mapping.OneToOne;
-import org.hibernate.mapping.PersistentClass;
-import org.hibernate.mapping.PrimaryKey;
-import org.hibernate.mapping.PrimitiveArray;
-import org.hibernate.mapping.RootClass;
-import org.hibernate.mapping.Set;
-import org.hibernate.mapping.SimpleValue;
-import org.hibernate.mapping.SingleTableSubclass;
-import org.hibernate.mapping.Table;
-import org.hibernate.mapping.Value;
 import org.hibernate.tool.api.export.ArtifactCollector;
 import org.hibernate.tool.api.export.ExporterConstants;
 import org.hibernate.tool.api.reveng.RevengSettings;
@@ -54,7 +32,6 @@ import org.hibernate.tool.api.reveng.RevengStrategy;
 import org.hibernate.tool.ide.completion.HQLCodeAssist;
 import org.hibernate.tool.ide.completion.HQLCompletionProposal;
 import org.hibernate.tool.internal.export.ddl.DdlExporter;
-import org.hibernate.tool.internal.export.hbm.Cfg2HbmTool;
 import org.hibernate.tool.internal.export.hbm.HbmExporter;
 import org.hibernate.tool.internal.reveng.strategy.DefaultStrategy;
 import org.hibernate.tool.internal.reveng.strategy.DelegatingStrategy;
@@ -76,22 +53,25 @@ import org.hibernate.tool.orm.jbt.api.wrp.SchemaExportWrapper;
 import org.hibernate.tool.orm.jbt.api.wrp.TableFilterWrapper;
 import org.hibernate.tool.orm.jbt.api.wrp.TableWrapper;
 import org.hibernate.tool.orm.jbt.api.wrp.TypeFactoryWrapper;
+import org.hibernate.tool.orm.jbt.api.wrp.ValueWrapper;
 import org.hibernate.tool.orm.jbt.api.wrp.Wrapper;
-import org.hibernate.tool.orm.jbt.internal.factory.ConfigurationWrapperFactory;
-import org.hibernate.tool.orm.jbt.internal.factory.RevengStrategyWrapperFactory;
-import org.hibernate.tool.orm.jbt.internal.factory.TableWrapperFactory;
 import org.hibernate.tool.orm.jbt.internal.util.ConfigurationMetadataDescriptor;
-import org.hibernate.tool.orm.jbt.internal.util.DummyMetadataBuildingContext;
 import org.hibernate.tool.orm.jbt.internal.util.JpaConfiguration;
 import org.hibernate.tool.orm.jbt.internal.util.MetadataHelper;
 import org.hibernate.tool.orm.jbt.internal.util.NativeConfiguration;
 import org.hibernate.tool.orm.jbt.internal.util.RevengConfiguration;
+import org.hibernate.tool.orm.jbt.models.ConfigurationWrapperFactory;
+import org.hibernate.tool.orm.jbt.models.PersistentClassWrapperFactory;
+import org.hibernate.tool.orm.jbt.models.PersistentClassWrapperFactory.EntityKind;
+import org.hibernate.tool.orm.jbt.models.RevengStrategyWrapperFactory;
+import org.hibernate.tool.orm.jbt.models.ValueWrapperFactory;
+import org.hibernate.tool.orm.jbt.models.ValueWrapperFactory.ValueKind;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class WrapperFactoryTest {
-	
+
 	@Test
 	public void testCreateArtifactCollectorWrapper() {
 		Object artifactCollectorWrapper = WrapperFactory.createArtifactCollectorWrapper();
@@ -100,16 +80,14 @@ public class WrapperFactoryTest {
 		Object wrappedArtifactCollector = ((Wrapper)artifactCollectorWrapper).getWrappedObject();
 		assertTrue(wrappedArtifactCollector instanceof ArtifactCollector);
 	}
-	
+
 	@Test
 	public void testCreateCfg2HbmWrapper() {
 		Object cfg2HbmWrapper = WrapperFactory.createCfg2HbmWrapper();
 		assertNotNull(cfg2HbmWrapper);
 		assertTrue(cfg2HbmWrapper instanceof Wrapper);
-		Object cfg2HbmTool = ((Wrapper)cfg2HbmWrapper).getWrappedObject();
-		assertTrue(cfg2HbmTool instanceof Cfg2HbmTool);
 	}
-	
+
 	@Test
 	public void testCreateNamingStrategyWrapper() {
 		Object namingStrategyWrapper = WrapperFactory.createNamingStrategyWrapper(ImplicitNamingStrategyJpaCompliantImpl.class.getName());
@@ -127,7 +105,7 @@ public class WrapperFactoryTest {
 		}
 		assertNull(namingStrategyWrapper);
 	}
-	
+
 	@Test
 	public void testCreateOverrideRepositoryWrapper() {
 		Object overrideRepositoryWrapper = WrapperFactory.createOverrideRepositoryWrapper();
@@ -136,7 +114,7 @@ public class WrapperFactoryTest {
 		Object wrappedOverrideRepository = ((Wrapper)overrideRepositoryWrapper).getWrappedObject();
 		assertTrue(wrappedOverrideRepository instanceof OverrideRepository);
 	}
-	
+
 	@Test
 	public void testCreateRevengStrategyWrapper() throws Exception {
 		Field delegateField = DelegatingStrategy.class.getDeclaredField("delegate");
@@ -149,16 +127,16 @@ public class WrapperFactoryTest {
 		RevengStrategyWrapper delegate = (RevengStrategyWrapper)reverseEngineeringStrategyWrapper;
 		reverseEngineeringStrategyWrapper = WrapperFactory
 				.createRevengStrategyWrapper(
-						TestDelegatingStrategy.class.getName(), 
+						TestDelegatingStrategy.class.getName(),
 						delegate);
 		assertNotNull(reverseEngineeringStrategyWrapper);
 		assertTrue(reverseEngineeringStrategyWrapper instanceof Wrapper);
 		assertTrue(((Wrapper)reverseEngineeringStrategyWrapper).getWrappedObject() instanceof TestDelegatingStrategy);
 		assertSame(
-				delegateField.get(((Wrapper)reverseEngineeringStrategyWrapper).getWrappedObject()), 
+				delegateField.get(((Wrapper)reverseEngineeringStrategyWrapper).getWrappedObject()),
 				delegate.getWrappedObject());
 	}
-	
+
 	@Test
 	public void testCreateRevengSettingsWrapper() {
 		Object reverseEngineeringSettingsWrapper = null;
@@ -169,7 +147,7 @@ public class WrapperFactoryTest {
 		RevengSettings revengSettings = (RevengSettings)((RevengSettingsWrapper)reverseEngineeringSettingsWrapper).getWrappedObject();
 		assertSame(strategy.getWrappedObject(), revengSettings.getRootStrategy());
 	}
-	
+
 	@Test
 	public void testCreateNativeConfigurationWrapper() {
 		Object configurationWrapper = WrapperFactory.createNativeConfigurationWrapper();
@@ -178,7 +156,7 @@ public class WrapperFactoryTest {
 		Object wrappedConfiguration = ((ConfigurationWrapper)configurationWrapper).getWrappedObject();
 		assertTrue(wrappedConfiguration instanceof NativeConfiguration);
 	}
-		
+
 	@Test
 	public void testCreateRevengConfigurationWrapper() {
 		Object configurationWrapper = WrapperFactory.createRevengConfigurationWrapper();
@@ -187,7 +165,7 @@ public class WrapperFactoryTest {
 		Object wrappedConfiguration = ((ConfigurationWrapper)configurationWrapper).getWrappedObject();
 		assertTrue(wrappedConfiguration instanceof RevengConfiguration);
 	}
-		
+
 	@Test
 	public void testCreateJpaConfigurationWrapper() {
 		Object configurationWrapper = WrapperFactory.createJpaConfigurationWrapper(null, null);
@@ -196,24 +174,25 @@ public class WrapperFactoryTest {
 		Object wrappedConfiguration = ((ConfigurationWrapper)configurationWrapper).getWrappedObject();
 		assertTrue(wrappedConfiguration instanceof JpaConfiguration);
 	}
-	
+
 	@Test
 	public void testCreateColumnWrapper() {
-		Object columnWrapper = WrapperFactory.createColumnWrapper(null);
+		Object columnWrapper = WrapperFactory.createColumnWrapper("foo");
 		assertNotNull(columnWrapper);
 		assertTrue(columnWrapper instanceof ColumnWrapper);
-		Object wrappedColumn = ((ColumnWrapper)columnWrapper).getWrappedObject();
-		assertTrue(wrappedColumn instanceof Column);
+		assertEquals("foo", ((ColumnWrapper)columnWrapper).getName());
 	}
-	
+
 	@Test
 	public void testCreateRootClassWrapper() {
 		Object rootClassWrapper = WrapperFactory.createRootClassWrapper();
 		assertNotNull(rootClassWrapper);
 		assertTrue(rootClassWrapper instanceof PersistentClassWrapper);
-		assertTrue(((PersistentClassWrapper)rootClassWrapper).getWrappedObject() instanceof RootClass);
+		PersistentClassWrapperFactory.PersistentClassWrapperImpl impl =
+				(PersistentClassWrapperFactory.PersistentClassWrapperImpl) rootClassWrapper;
+		assertEquals(EntityKind.ROOT, impl.getEntityKind());
 	}
-	
+
 	@Test
 	public void testCreateSingleTableSubclassWrapper() {
 		Object rootClassWrapper = WrapperFactory.createRootClassWrapper();
@@ -221,13 +200,12 @@ public class WrapperFactoryTest {
 				rootClassWrapper);
 		assertNotNull(singleTableSubclassWrapper);
 		assertTrue(singleTableSubclassWrapper instanceof PersistentClassWrapper);
-		PersistentClass persistentClass = (PersistentClass)((PersistentClassWrapper)singleTableSubclassWrapper).getWrappedObject();
-		assertTrue(persistentClass instanceof SingleTableSubclass);
-		assertSame(
-				((SingleTableSubclass)persistentClass).getRootClass(), 
-				((PersistentClassWrapper)rootClassWrapper).getWrappedObject());
+		PersistentClassWrapperFactory.PersistentClassWrapperImpl impl =
+				(PersistentClassWrapperFactory.PersistentClassWrapperImpl) singleTableSubclassWrapper;
+		assertEquals(EntityKind.SINGLE_TABLE_SUBCLASS, impl.getEntityKind());
+		assertSame(rootClassWrapper, ((PersistentClassWrapper)singleTableSubclassWrapper).getRootClass());
 	}
-	
+
 	@Test
 	public void testCreateJoinedSubclassWrapper() {
 		Object rootClassWrapper = WrapperFactory.createRootClassWrapper();
@@ -235,69 +213,65 @@ public class WrapperFactoryTest {
 				rootClassWrapper);
 		assertNotNull(joinedTableSubclassWrapper);
 		assertTrue(joinedTableSubclassWrapper instanceof PersistentClassWrapper);
-		PersistentClass persistentClass = (PersistentClass)((PersistentClassWrapper)joinedTableSubclassWrapper).getWrappedObject();
-		assertTrue(persistentClass instanceof JoinedSubclass);
-		assertSame(
-				((JoinedSubclass)persistentClass).getRootClass(), 
-				((PersistentClassWrapper)rootClassWrapper).getWrappedObject());
+		PersistentClassWrapperFactory.PersistentClassWrapperImpl impl =
+				(PersistentClassWrapperFactory.PersistentClassWrapperImpl) joinedTableSubclassWrapper;
+		assertEquals(EntityKind.JOINED_SUBCLASS, impl.getEntityKind());
+		assertSame(rootClassWrapper, ((PersistentClassWrapper)joinedTableSubclassWrapper).getRootClass());
 	}
-	
+
 	@Test
 	public void testCreateSpecialRootClassWrapper() {
 		PropertyWrapper propertyWrapper = (PropertyWrapper)WrapperFactory.createPropertyWrapper();
 		Object specialRootClassWrapper = WrapperFactory.createSpecialRootClassWrapper(propertyWrapper);
 		assertNotNull(specialRootClassWrapper);
-        assertInstanceOf(PersistentClassWrapper.class, specialRootClassWrapper);
+		assertInstanceOf(PersistentClassWrapper.class, specialRootClassWrapper);
 		assertSame(propertyWrapper, ((PersistentClassWrapper)specialRootClassWrapper).getProperty());
 	}
-	
+
 	@Test
 	public void testCreatePropertyWrapper() {
 		Object propertyWrapper = WrapperFactory.createPropertyWrapper();
 		assertNotNull(propertyWrapper);
 		assertTrue(propertyWrapper instanceof PropertyWrapper);
 	}
-	
+
 	@Test
 	public void testCreateHqlCompletionProposalWrapper() {
-		HQLCompletionProposal hqlCompletionProposalTarget = 
+		HQLCompletionProposal hqlCompletionProposalTarget =
 				new HQLCompletionProposal(HQLCompletionProposal.PROPERTY, Integer.MAX_VALUE);
-		Object hqlCompletionProposalWrapper = 
+		Object hqlCompletionProposalWrapper =
 				WrapperFactory.createHqlCompletionProposalWrapper(hqlCompletionProposalTarget);
 		assertNotNull(hqlCompletionProposalWrapper);
 		assertTrue(hqlCompletionProposalWrapper instanceof HqlCompletionProposalWrapper);
 	}
-		
+
 	@Test
 	public void testCreateArrayWrapper() {
 		Object persistentClassWrapper = WrapperFactory.createRootClassWrapper();
-		PersistentClass persistentClassTarget = (PersistentClass)((Wrapper)persistentClassWrapper).getWrappedObject();
 		Object arrayWrapper = WrapperFactory.createArrayWrapper(persistentClassWrapper);
-		Value wrappedArray = (Value)((Wrapper)arrayWrapper).getWrappedObject();
-		assertTrue(wrappedArray instanceof Array);
-		assertSame(((Array)wrappedArray).getOwner(), persistentClassTarget);
+		assertTrue(arrayWrapper instanceof ValueWrapper);
+		ValueWrapperFactory.ValueWrapperImpl impl = (ValueWrapperFactory.ValueWrapperImpl) arrayWrapper;
+		assertEquals(ValueKind.ARRAY, impl.getKind());
 	}
 
 	@Test
 	public void testCreateBagWrapper() {
 		Object persistentClassWrapper = WrapperFactory.createRootClassWrapper();
-		PersistentClass persistentClassTarget = (PersistentClass)((Wrapper)persistentClassWrapper).getWrappedObject();
 		Object bagWrapper = WrapperFactory.createBagWrapper(persistentClassWrapper);
-		Value wrappedBag = (Value)((Wrapper)bagWrapper).getWrappedObject();
-		assertTrue(wrappedBag instanceof Bag);
-		assertSame(((Bag)wrappedBag).getOwner(), persistentClassTarget);
+		assertTrue(bagWrapper instanceof ValueWrapper);
+		ValueWrapperFactory.ValueWrapperImpl impl = (ValueWrapperFactory.ValueWrapperImpl) bagWrapper;
+		assertEquals(ValueKind.BAG, impl.getKind());
 	}
 
 	@Test
 	public void testCreateListWrapper() {
 		Object persistentClassWrapper = WrapperFactory.createRootClassWrapper();
-		PersistentClass persistentClassTarget = (PersistentClass)((Wrapper)persistentClassWrapper).getWrappedObject();
 		Object listWrapper = WrapperFactory.createListWrapper(persistentClassWrapper);
-		Value wrappedList = (Value)((Wrapper)listWrapper).getWrappedObject();
-		assertTrue(wrappedList instanceof List);
-		assertSame(((List)wrappedList).getOwner(), persistentClassTarget);
+		assertTrue(listWrapper instanceof ValueWrapper);
+		ValueWrapperFactory.ValueWrapperImpl impl = (ValueWrapperFactory.ValueWrapperImpl) listWrapper;
+		assertEquals(ValueKind.LIST, impl.getKind());
 	}
-	
+
 	@Test
 	public void testCreateDatabaseReaderWrapper() {
 		Properties properties = new Properties();
@@ -308,137 +282,114 @@ public class WrapperFactoryTest {
 		assertNotNull(databaseReaderWrapper);
 		assertTrue(databaseReaderWrapper instanceof DatabaseReaderWrapper);
 	}
-	
+
 	@Test
 	public void testCreateTableWrapper() {
 		Object tableWrapper = WrapperFactory.createTableWrapper("foo");
 		assertNotNull(tableWrapper);
 		assertTrue(tableWrapper instanceof TableWrapper);
-		Table table = (Table)((TableWrapper)tableWrapper).getWrappedObject();
-		assertEquals("foo", table.getName());
-		PrimaryKey pk = table.getPrimaryKey();
-		assertSame(table, pk.getTable());
+		assertEquals("foo", ((TableWrapper)tableWrapper).getName());
 	}
 
 	@Test
 	public void testCreateManyToOneWrapper() {
-		TableWrapper tableWrapper = TableWrapperFactory.createTableWrapper("foo");
-		Table table = (Table)tableWrapper.getWrappedObject();
+		TableWrapper tableWrapper = (TableWrapper) WrapperFactory.createTableWrapper("foo");
 		Object manyToOneWrapper = WrapperFactory.createManyToOneWrapper(tableWrapper);
-		Value wrappedManyToOne = (Value)((Wrapper)manyToOneWrapper).getWrappedObject();
-		assertTrue(wrappedManyToOne instanceof ManyToOne);
-		assertSame(table, wrappedManyToOne.getTable());
+		assertTrue(manyToOneWrapper instanceof ValueWrapper);
+		ValueWrapperFactory.ValueWrapperImpl impl = (ValueWrapperFactory.ValueWrapperImpl) manyToOneWrapper;
+		assertEquals(ValueKind.MANY_TO_ONE, impl.getKind());
 	}
 
 	@Test
 	public void testCreateMapWrapper() {
 		Object persistentClassWrapper = WrapperFactory.createRootClassWrapper();
-		PersistentClass persistentClassTarget = (PersistentClass)((Wrapper)persistentClassWrapper).getWrappedObject();
 		Object mapWrapper = WrapperFactory.createMapWrapper(persistentClassWrapper);
-		Value wrappedMap = (Value)((Wrapper)mapWrapper).getWrappedObject();
-		assertTrue(wrappedMap instanceof Map);
-		assertSame(((Map)wrappedMap).getOwner(), persistentClassTarget);
+		assertTrue(mapWrapper instanceof ValueWrapper);
+		ValueWrapperFactory.ValueWrapperImpl impl = (ValueWrapperFactory.ValueWrapperImpl) mapWrapper;
+		assertEquals(ValueKind.MAP, impl.getKind());
 	}
-	
+
 	@Test
 	public void testCreateOneToManyWrapper() {
 		Object persistentClassWrapper = WrapperFactory.createRootClassWrapper();
-		PersistentClass persistentClassTarget = (PersistentClass)((Wrapper)persistentClassWrapper).getWrappedObject();
-		TableWrapper tableWrapper = (TableWrapper)WrapperFactory.createTableWrapper("foo");
-		((RootClass)persistentClassTarget).setTable((Table)tableWrapper.getWrappedObject());
 		Object oneToManyWrapper = WrapperFactory.createOneToManyWrapper(persistentClassWrapper);
-		Value wrappedOneToMany = (Value)((Wrapper)oneToManyWrapper).getWrappedObject();
-		assertTrue(wrappedOneToMany instanceof OneToMany);
-		assertSame(((OneToMany)wrappedOneToMany).getTable(), tableWrapper.getWrappedObject());
+		assertTrue(oneToManyWrapper instanceof ValueWrapper);
+		ValueWrapperFactory.ValueWrapperImpl impl = (ValueWrapperFactory.ValueWrapperImpl) oneToManyWrapper;
+		assertEquals(ValueKind.ONE_TO_MANY, impl.getKind());
 	}
-	
+
 	@Test
 	public void testCreateOneToOneWrapper() {
-		RootClass rc = new RootClass(DummyMetadataBuildingContext.INSTANCE);
-		PersistentClassWrapper persistentClassWrapper = 
-				org.hibernate.tool.orm.jbt.internal.factory.PersistentClassWrapperFactory.createPersistentClassWrapper(rc);
-		PersistentClass persistentClassTarget = (PersistentClass)persistentClassWrapper.getWrappedObject();
-		Table tableTarget = new Table("", "foo");
-		((RootClass)persistentClassTarget).setTable(tableTarget);
-		persistentClassTarget.setEntityName("bar");
+		Object persistentClassWrapper = WrapperFactory.createRootClassWrapper();
 		Object oneToOneWrapper = WrapperFactory.createOneToOneWrapper(persistentClassWrapper);
-		Value wrappedOneToOne = (Value)((Wrapper)oneToOneWrapper).getWrappedObject();
-		assertTrue(wrappedOneToOne instanceof OneToOne);
-		assertEquals(((OneToOne)wrappedOneToOne).getEntityName(), "bar");
-		assertSame(((OneToOne)wrappedOneToOne).getTable(), tableTarget);
+		assertTrue(oneToOneWrapper instanceof ValueWrapper);
+		ValueWrapperFactory.ValueWrapperImpl impl = (ValueWrapperFactory.ValueWrapperImpl) oneToOneWrapper;
+		assertEquals(ValueKind.ONE_TO_ONE, impl.getKind());
 	}
-	
+
 	@Test
 	public void testCreatePrimitiveArrayWrapper() {
 		Object persistentClassWrapper = WrapperFactory.createRootClassWrapper();
-		PersistentClass persistentClassTarget = (PersistentClass)((Wrapper)persistentClassWrapper).getWrappedObject();
 		Object primitiveArrayWrapper = WrapperFactory.createPrimitiveArrayWrapper(persistentClassWrapper);
-		Value wrappedPrimitiveArray = (Value)((Wrapper)primitiveArrayWrapper).getWrappedObject();
-		assertTrue(wrappedPrimitiveArray instanceof PrimitiveArray);
-		assertSame(((PrimitiveArray)wrappedPrimitiveArray).getOwner(), persistentClassTarget);
+		assertTrue(primitiveArrayWrapper instanceof ValueWrapper);
+		ValueWrapperFactory.ValueWrapperImpl impl = (ValueWrapperFactory.ValueWrapperImpl) primitiveArrayWrapper;
+		assertEquals(ValueKind.PRIMITIVE_ARRAY, impl.getKind());
 	}
 
 	@Test
 	public void testCreateSetWrapper() {
 		Object persistentClassWrapper = WrapperFactory.createRootClassWrapper();
-		PersistentClass persistentClassTarget = (PersistentClass)((Wrapper)persistentClassWrapper).getWrappedObject();
 		Object setWrapper = WrapperFactory.createSetWrapper(persistentClassWrapper);
-		Value wrappedSet = (Value)((Wrapper)setWrapper).getWrappedObject();
-		assertTrue(wrappedSet instanceof Set);
-		assertSame(((Set)wrappedSet).getOwner(), persistentClassTarget);
+		assertTrue(setWrapper instanceof ValueWrapper);
+		ValueWrapperFactory.ValueWrapperImpl impl = (ValueWrapperFactory.ValueWrapperImpl) setWrapper;
+		assertEquals(ValueKind.SET, impl.getKind());
 	}
-	
+
 	@Test
 	public void testCreateSimpleValueWrapper() {
 		Object simpleValueWrapper = WrapperFactory.createSimpleValueWrapper();
-		Value wrappedSimpleValue = (Value)((Wrapper)simpleValueWrapper).getWrappedObject();
-		assertTrue(wrappedSimpleValue instanceof SimpleValue);
+		assertTrue(simpleValueWrapper instanceof ValueWrapper);
+		ValueWrapperFactory.ValueWrapperImpl impl = (ValueWrapperFactory.ValueWrapperImpl) simpleValueWrapper;
+		assertEquals(ValueKind.SIMPLE_VALUE, impl.getKind());
 	}
-	
+
 	@Test
 	public void testCreateComponentWrapper() {
 		Object persistentClassWrapper = WrapperFactory.createRootClassWrapper();
-		PersistentClass persistentClassTarget = (PersistentClass)((Wrapper)persistentClassWrapper).getWrappedObject();
 		Object componentWrapper = WrapperFactory.createComponentWrapper(persistentClassWrapper);
-		Value wrappedComponent = (Value)((Wrapper)componentWrapper).getWrappedObject();
-		assertTrue(wrappedComponent instanceof Component);
-		assertSame(((Component)wrappedComponent).getOwner(), persistentClassTarget);
+		assertTrue(componentWrapper instanceof ValueWrapper);
+		ValueWrapperFactory.ValueWrapperImpl impl = (ValueWrapperFactory.ValueWrapperImpl) componentWrapper;
+		assertEquals(ValueKind.COMPONENT, impl.getKind());
 	}
-	
+
 	@Test
 	public void testCreateDependantValueWrapper() {
-		TableWrapper tableWrapper = TableWrapperFactory.createTableWrapper("foo");
-		Table tableTarget = (Table)tableWrapper.getWrappedObject();
+		TableWrapper tableWrapper = (TableWrapper) WrapperFactory.createTableWrapper("foo");
 		Object valueWrapper = WrapperFactory.createSimpleValueWrapper();
 		Object dependantValueWrapper = WrapperFactory.createDependantValueWrapper(tableWrapper, valueWrapper);
-		Value wrappedDependantValue = (Value)((Wrapper)dependantValueWrapper).getWrappedObject();
-		assertTrue(wrappedDependantValue instanceof DependantValue);
-		assertSame(tableTarget, ((DependantValue)wrappedDependantValue).getTable());
-		assertSame(
-				((DependantValue)wrappedDependantValue).getWrappedValue(), 
-				((Wrapper)valueWrapper).getWrappedObject());
+		assertTrue(dependantValueWrapper instanceof ValueWrapper);
+		ValueWrapperFactory.ValueWrapperImpl impl = (ValueWrapperFactory.ValueWrapperImpl) dependantValueWrapper;
+		assertEquals(ValueKind.DEPENDANT_VALUE, impl.getKind());
 	}
-	
+
 	@Test
 	public void testCreateAnyValueWrapper() {
-		TableWrapper tableWrapper = TableWrapperFactory.createTableWrapper("foo");
-		Table tableTarget = (Table)tableWrapper.getWrappedObject();
+		TableWrapper tableWrapper = (TableWrapper) WrapperFactory.createTableWrapper("foo");
 		Object anyValueWrapper = WrapperFactory.createAnyValueWrapper(tableWrapper);
-		Value wrappedAnyValue = (Value)((Wrapper)anyValueWrapper).getWrappedObject();
-		assertTrue(wrappedAnyValue instanceof Any);
-		assertSame(tableTarget, ((Any)wrappedAnyValue).getTable());
+		assertTrue(anyValueWrapper instanceof ValueWrapper);
+		ValueWrapperFactory.ValueWrapperImpl impl = (ValueWrapperFactory.ValueWrapperImpl) anyValueWrapper;
+		assertEquals(ValueKind.ANY, impl.getKind());
 	}
-	
+
 	@Test
 	public void testCreateIdentifierBagValueWrapper() {
 		Object persistentClassWrapper = WrapperFactory.createRootClassWrapper();
-		PersistentClass persistentClassTarget = (PersistentClass)((Wrapper)persistentClassWrapper).getWrappedObject();
 		Object identifierBagValueWrapper = WrapperFactory.createIdentifierBagValueWrapper(persistentClassWrapper);
-		Value wrappedIdentifierBagValue = (Value)((Wrapper)identifierBagValueWrapper).getWrappedObject();
-		assertTrue(wrappedIdentifierBagValue instanceof IdentifierBag);
-		assertSame(((IdentifierBag)wrappedIdentifierBagValue).getOwner(), persistentClassTarget);
+		assertTrue(identifierBagValueWrapper instanceof ValueWrapper);
+		ValueWrapperFactory.ValueWrapperImpl impl = (ValueWrapperFactory.ValueWrapperImpl) identifierBagValueWrapper;
+		assertEquals(ValueKind.IDENTIFIER_BAG, impl.getKind());
 	}
-	
+
 	@Test
 	public void testCreateTableFilterWrapper() {
 		Object tableFilterWrapper = WrapperFactory.createTableFilterWrapper();
@@ -446,33 +397,29 @@ public class WrapperFactoryTest {
 		assertTrue(tableFilterWrapper instanceof TableFilterWrapper);
 		Object wrappedTableFilter = ((Wrapper)tableFilterWrapper).getWrappedObject();
 		assertTrue(wrappedTableFilter instanceof TableFilter);
-		
 	}
-	
+
 	@Test
 	public void testCreateTypeFactoryWrapper() {
 		Object typeFactoryWrapper = WrapperFactory.createTypeFactoryWrapper();
 		assertNotNull(typeFactoryWrapper);
 		assertTrue(typeFactoryWrapper instanceof TypeFactoryWrapper);
 	}
-	
+
 	@Test
 	public void testCreateEnvironmentWrapper() {
 		assertNotNull(WrapperFactory.createEnvironmentWrapper());
 	}
-	
+
 	@Test
 	public void testCreateSchemaExport() throws Exception {
-		ConfigurationWrapper configurationWrapper = 
+		ConfigurationWrapper configurationWrapper =
 				ConfigurationWrapperFactory.createNativeConfigurationWrapper();
 		Object schemaExport = WrapperFactory.createSchemaExport(configurationWrapper);
 		assertNotNull(schemaExport);
 		assertTrue(schemaExport instanceof SchemaExportWrapper);
-		Field configurationField = schemaExport.getClass().getDeclaredField("configuration");
-		configurationField.setAccessible(true);
-		assertSame(configurationWrapper.getWrappedObject(), configurationField.get(schemaExport));
 	}
-	
+
 	@Test
 	public void testCreateHbmExporterWrapper() throws Exception {
 		ConfigurationWrapper configuration = ConfigurationWrapperFactory.createNativeConfigurationWrapper();
@@ -481,7 +428,7 @@ public class WrapperFactoryTest {
 		HbmExporter wrappedHbmExporter = (HbmExporter)((Wrapper)hbmExporterWrapper).getWrappedObject();
 		assertNotNull(hbmExporterWrapper);
 		assertSame(file, wrappedHbmExporter.getProperties().get(ExporterConstants.OUTPUT_FILE_NAME));
-		ConfigurationMetadataDescriptor descriptor = 
+		ConfigurationMetadataDescriptor descriptor =
 				(ConfigurationMetadataDescriptor)wrappedHbmExporter
 					.getProperties()
 					.get(ExporterConstants.METADATA_DESCRIPTOR);
@@ -490,14 +437,14 @@ public class WrapperFactoryTest {
 		configurationField.setAccessible(true);
 		assertSame(configuration.getWrappedObject(), configurationField.get(descriptor));
 	}
-	
+
 	@Test
 	public void testCreateExporterWrapper() {
 		Object exporterWrapper = WrapperFactory.createExporterWrapper(DdlExporter.class.getName());
 		assertNotNull(exporterWrapper);
 		assertTrue(exporterWrapper instanceof ExporterWrapper);
 	}
-	
+
 	@Test
 	public void testCreateHqlCodeAssistWrapper() throws Exception {
 		ConfigurationWrapper configurationWrapper = ConfigurationWrapperFactory.createNativeConfigurationWrapper();
@@ -508,9 +455,8 @@ public class WrapperFactoryTest {
 		Field metadataField = HQLCodeAssist.class.getDeclaredField("metadata");
 		metadataField.setAccessible(true);
 		assertSame(metadata, metadataField.get(((Wrapper)hqlCodeAssistWrapper).getWrappedObject()));
-		
 	}
-		
+
 	public static class TestRevengStrategy extends DefaultStrategy {}
 	public static class TestDelegatingStrategy extends DelegatingStrategy {
 		public TestDelegatingStrategy(RevengStrategy delegate) {

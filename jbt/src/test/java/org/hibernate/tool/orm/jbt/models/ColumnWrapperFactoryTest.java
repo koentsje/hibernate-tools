@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.hibernate.tool.orm.jbt.api.wrp.ColumnWrapper;
 import org.hibernate.tool.orm.jbt.api.wrp.ValueWrapper;
-import org.hibernate.tool.orm.jbt.internal.factory.ValueWrapperFactory;
+import org.hibernate.tool.orm.jbt.models.ValueWrapperFactory;
 import org.hibernate.tool.orm.jbt.models.ColumnWrapperFactory.ColumnWrapperImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -125,7 +125,7 @@ public class ConfigurationWrapperFactory {
 					@Override public boolean hasNext() { return classMappings.hasNext(); }
 					@Override
 					public PersistentClassWrapper next() {
-						return org.hibernate.tool.orm.jbt.internal.factory.PersistentClassWrapperFactory
+						return PersistentClassWrapperFactory
 								.createPersistentClassWrapper(classMappings.next());
 					}
 				};
@@ -161,7 +161,7 @@ public class ConfigurationWrapperFactory {
 				PersistentClass classMapping =
 						((ExtendedConfiguration) wrappedConfiguration).getClassMapping(string);
 				if (classMapping != null) {
-					return org.hibernate.tool.orm.jbt.internal.factory.PersistentClassWrapperFactory
+					return PersistentClassWrapperFactory
 							.createPersistentClassWrapper(classMapping);
 				}
 			}
@@ -201,8 +201,13 @@ public class ConfigurationWrapperFactory {
 					@Override public boolean hasNext() { return tableMappings.hasNext(); }
 					@Override
 					public TableWrapper next() {
-						return org.hibernate.tool.orm.jbt.internal.factory.TableWrapperFactory
-								.createTableWrapper(tableMappings.next());
+						Table table = tableMappings.next();
+						TableWrapper tw = TableWrapperFactory.createTableWrapper(table.getName());
+						TableWrapperFactory.TableWrapperImpl twImpl =
+								(TableWrapperFactory.TableWrapperImpl) tw;
+						twImpl.setCatalog(table.getCatalog());
+						twImpl.setSchema(table.getSchema());
+						return tw;
 					}
 				};
 			}

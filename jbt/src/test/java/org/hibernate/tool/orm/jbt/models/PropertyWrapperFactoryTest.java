@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.hibernate.tool.orm.jbt.api.wrp.PersistentClassWrapper;
 import org.hibernate.tool.orm.jbt.api.wrp.PropertyWrapper;
 import org.hibernate.tool.orm.jbt.api.wrp.ValueWrapper;
-import org.hibernate.tool.orm.jbt.internal.factory.ValueWrapperFactory;
+import org.hibernate.tool.orm.jbt.models.ValueWrapperFactory;
 import org.hibernate.tool.orm.jbt.models.PropertyWrapperFactory.PropertyWrapperImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -77,7 +77,7 @@ public class PropertyWrapperFactoryTest {
 		assertFalse(propertyWrapper.isComposite());
 		// Component values report isComponent() = true
 		PersistentClassWrapper pcw =
-				org.hibernate.tool.orm.jbt.internal.factory.PersistentClassWrapperFactory.createRootClassWrapper();
+				org.hibernate.tool.orm.jbt.models.PersistentClassWrapperFactory.createRootClassWrapper();
 		ValueWrapper componentValue = ValueWrapperFactory.createComponentWrapper(pcw);
 		propertyWrapper.setValue(componentValue);
 		assertTrue(propertyWrapper.isComposite());
