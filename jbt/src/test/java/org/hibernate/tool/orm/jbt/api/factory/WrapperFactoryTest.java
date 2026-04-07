@@ -60,12 +60,12 @@ import org.hibernate.tool.orm.jbt.internal.util.JpaConfiguration;
 import org.hibernate.tool.orm.jbt.internal.util.MetadataHelper;
 import org.hibernate.tool.orm.jbt.internal.util.NativeConfiguration;
 import org.hibernate.tool.orm.jbt.internal.util.RevengConfiguration;
-import org.hibernate.tool.orm.jbt.models.ConfigurationWrapperFactory;
-import org.hibernate.tool.orm.jbt.models.PersistentClassWrapperFactory;
-import org.hibernate.tool.orm.jbt.models.PersistentClassWrapperFactory.EntityKind;
-import org.hibernate.tool.orm.jbt.models.RevengStrategyWrapperFactory;
-import org.hibernate.tool.orm.jbt.models.ValueWrapperFactory;
-import org.hibernate.tool.orm.jbt.models.ValueWrapperFactory.ValueKind;
+import org.hibernate.tool.orm.jbt.internal.wrp.ConfigurationWrapperFactory;
+import org.hibernate.tool.orm.jbt.internal.wrp.PersistentClassWrapperFactory;
+import org.hibernate.tool.orm.jbt.internal.wrp.PersistentClassWrapperFactory.EntityKind;
+import org.hibernate.tool.orm.jbt.internal.wrp.RevengStrategyWrapperFactory;
+import org.hibernate.tool.orm.jbt.internal.wrp.ValueWrapperFactory;
+import org.hibernate.tool.orm.jbt.internal.wrp.ValueWrapperFactory.ValueKind;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import org.hibernate.tool.orm.jbt.api.wrp.TypeWrapper;
-import org.hibernate.tool.orm.jbt.models.TypeWrapperFactory;
+import org.hibernate.tool.orm.jbt.internal.wrp.TypeWrapperFactory;
 import org.hibernate.type.BasicTypeRegistry;
 import org.hibernate.type.Type;
 import org.hibernate.type.spi.TypeConfiguration;
