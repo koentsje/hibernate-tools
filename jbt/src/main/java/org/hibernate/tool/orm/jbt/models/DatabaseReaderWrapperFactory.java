@@ -31,6 +31,7 @@ import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.boot.spi.MetadataBuildingContext;
 import org.hibernate.engine.jdbc.spi.JdbcServices;
+import org.hibernate.mapping.Column;
 import org.hibernate.mapping.Table;
 import org.hibernate.tool.api.reveng.RevengDialect;
 import org.hibernate.tool.api.reveng.RevengDialectFactory;
@@ -90,7 +91,14 @@ public class DatabaseReaderWrapperFactory {
 					qualifier += table.getSchema();
 				}
 				List<TableWrapper> list = result.computeIfAbsent(qualifier, k -> new ArrayList<>());
-				list.add(TableWrapperFactory.createTableWrapper(table.getName()));
+				TableWrapper tw = TableWrapperFactory.createTableWrapper(table.getName());
+				TableWrapperFactory.TableWrapperImpl twImpl = (TableWrapperFactory.TableWrapperImpl) tw;
+				twImpl.setCatalog(table.getCatalog());
+				twImpl.setSchema(table.getSchema());
+				for (Column column : table.getColumns()) {
+					twImpl.addColumn(ColumnWrapperFactory.createColumnWrapper(column.getName()));
+				}
+				list.add(tw);
 			}
 			return result;
 		}
