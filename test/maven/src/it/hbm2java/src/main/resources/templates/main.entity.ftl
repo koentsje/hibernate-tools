@@ -13,32 +13,20 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-${pojo.getPackageDeclaration()}
-// Generated ${date} by Hibernate Tools ${version}
+${templateHelper.getPackageDeclaration()}
+// Generated ${date?datetime} by Hibernate Tools ${version}
 
 <#assign classbody>
-<#include "PojoTypeDeclaration.ftl"/> {
+<#include "type-declaration.entity.ftl"/> {
 
-<#if !pojo.isInterface()>
-<#include "PojoFields.ftl"/>
+<#include "fields.entity.ftl"/>
 
-<#include "PojoConstructors.ftl"/>
-   
-<#include "PojoPropertyAccessors.ftl"/>
+<#include "constructors.entity.ftl"/>
 
-<#include "PojoToString.ftl"/>
-
-<#include "PojoEqualsHashcode.ftl"/>
-
-<#else>
-<#include "PojoInterfacePropertyAccessors.ftl"/>
-
-</#if>
-<#include "PojoExtraClassCode.ftl"/>
+<#include "property-accessors.entity.ftl"/>
 
 }
 </#assign>
 
-${pojo.generateImports()}
+${templateHelper.generateImports()}
 ${classbody}
-
