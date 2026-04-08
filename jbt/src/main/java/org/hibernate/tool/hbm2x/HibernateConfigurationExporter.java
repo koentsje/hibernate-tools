@@ -17,6 +17,6 @@
  */
 package org.hibernate.tool.hbm2x;
 
-import org.hibernate.tool.internal.export.cfg.CfgExporter;
+import org.hibernate.tool.internal.reveng.models.exporter.cfg.CfgXmlExporter;
 
-public class HibernateConfigurationExporter extends CfgExporter {}
+public class HibernateConfigurationExporter extends CfgXmlExporter {}

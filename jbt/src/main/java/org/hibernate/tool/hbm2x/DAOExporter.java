@@ -17,6 +17,6 @@
  */
 package org.hibernate.tool.hbm2x;
 
-import org.hibernate.tool.internal.export.dao.DaoExporter;
+import org.hibernate.tool.internal.reveng.models.exporter.dao.DaoExporter;
 
 public class DAOExporter extends DaoExporter {}
