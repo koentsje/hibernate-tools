@@ -18,10 +18,15 @@
 package org.hibernate.tool.orm.jbt.internal.wrp;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.hibernate.tool.api.export.ArtifactCollector;
-import org.hibernate.tool.internal.export.common.DefaultArtifactCollector;
+import org.hibernate.tool.api.xml.XMLPrettyPrinter;
 import org.hibernate.tool.orm.jbt.api.wrp.ArtifactCollectorWrapper;
 
 public class ArtifactCollectorWrapperFactory {
@@ -30,28 +35,55 @@ public class ArtifactCollectorWrapperFactory {
 		return new ArtifactCollectorWrapperImpl();
 	}
 
-	public static class ArtifactCollectorWrapperImpl implements ArtifactCollectorWrapper {
+	public static class ArtifactCollectorWrapperImpl implements ArtifactCollectorWrapper, ArtifactCollector {
 
-		private ArtifactCollector wrappedArtifactCollector = new DefaultArtifactCollector();
+		private final Map<String, List<File>> files = new HashMap<>();
 
 		@Override
 		public Object getWrappedObject() {
-			return wrappedArtifactCollector;
+			return this;
+		}
+
+		@Override
+		public void addFile(File file, String type) {
+			files.computeIfAbsent(type, k -> new ArrayList<>()).add(file);
+		}
+
+		@Override
+		public int getFileCount(String type) {
+			List<File> existing = files.get(type);
+			return existing == null ? 0 : existing.size();
 		}
 
 		@Override
 		public Set<String> getFileTypes() {
-			return wrappedArtifactCollector.getFileTypes();
+			return files.keySet();
 		}
 
 		@Override
 		public void formatFiles() {
-			wrappedArtifactCollector.formatFiles();
+			formatXml("xml");
+			formatXml("hbm.xml");
+			formatXml("cfg.xml");
 		}
 
 		@Override
-		public File[] getFiles(String string) {
-			return wrappedArtifactCollector.getFiles(string);
+		public File[] getFiles(String type) {
+			List<File> existing = files.get(type);
+			return existing == null ? new File[0] : existing.toArray(new File[0]);
+		}
+
+		private void formatXml(String type) {
+			List<File> list = files.get(type);
+			if (list != null) {
+				for (File xmlFile : list) {
+					try {
+						XMLPrettyPrinter.prettyPrintFile(xmlFile);
+					} catch (IOException e) {
+						throw new RuntimeException("Could not format XML file: " + xmlFile, e);
+					}
+				}
+			}
 		}
 	}
 

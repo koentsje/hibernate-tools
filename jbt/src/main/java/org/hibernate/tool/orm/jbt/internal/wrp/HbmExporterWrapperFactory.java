@@ -22,97 +22,84 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
 
-import org.hibernate.cfg.Configuration;
-import org.hibernate.tool.api.export.ExporterConstants;
-import org.hibernate.tool.internal.export.hbm.HbmExporter;
-import org.hibernate.tool.internal.export.java.POJOClass;
 import org.hibernate.tool.orm.jbt.api.wrp.ConfigurationWrapper;
 import org.hibernate.tool.orm.jbt.api.wrp.HbmExporterWrapper;
-import org.hibernate.tool.orm.jbt.internal.util.ConfigurationMetadataDescriptor;
 
 public class HbmExporterWrapperFactory {
 
 	public static HbmExporterWrapper createHbmExporterWrapper(
 			ConfigurationWrapper configurationWrapper, File file) {
-		return new HbmExporterWrapperImpl(
-				new HbmExporterExtension(
-						(Configuration) configurationWrapper.getWrappedObject(), file));
+		return new HbmExporterWrapperImpl(configurationWrapper, file);
 	}
 
-	public static class HbmExporterExtension extends HbmExporter {
+	public static class HbmExporterWrapperImpl implements HbmExporterWrapper {
 
-		public Object delegateExporter = null;
+		private ConfigurationWrapper configurationWrapper;
+		private File outputFile;
+		private File outputDirectory;
+		private Object delegateExporter;
 
-		HbmExporterExtension(Configuration cfg, File f) {
-			getProperties().put(METADATA_DESCRIPTOR, new ConfigurationMetadataDescriptor(cfg));
-			if (f != null) {
-				getProperties().put(OUTPUT_FILE_NAME, f);
-			}
+		HbmExporterWrapperImpl(ConfigurationWrapper configurationWrapper, File file) {
+			this.configurationWrapper = configurationWrapper;
+			this.outputFile = file;
 		}
 
-		@SuppressWarnings({ "rawtypes", "unchecked" })
 		@Override
-		public void exportPOJO(Map map, POJOClass pojoClass) {
-			if (delegateExporter == null) {
-				super.exportPOJO(map, pojoClass);
-			} else {
-				delegateExporterExportPOJO(
-						(Map<Object, Object>) map,
-						pojoClass,
-						pojoClass.getQualifiedDeclarationName());
+		public Object getWrappedObject() {
+			return this;
+		}
+
+		@Override
+		public void start() {
+			// TODO: bridge to new HbmXmlExporter
+		}
+
+		@Override
+		public File getOutputDirectory() {
+			return outputDirectory;
+		}
+
+		@Override
+		public void setOutputDirectory(File f) {
+			this.outputDirectory = f;
+		}
+
+		@Override
+		public void exportPOJO(Map<Object, Object> map, Object pojoClass) {
+			if (delegateExporter != null) {
+				delegateExporterExportPOJO(map, pojoClass);
 			}
 		}
 
-		private void delegateExporterExportPOJO(
-				Map<Object, Object> map, POJOClass pojoClass, String qualifiedDeclarationName) {
+		@Override
+		public void setExportPOJODelegate(Object delegate) {
+			this.delegateExporter = delegate;
+		}
+
+		public File getOutputFile() {
+			return outputFile;
+		}
+
+		public ConfigurationWrapper getConfigurationWrapper() {
+			return configurationWrapper;
+		}
+
+		public Object getDelegateExporter() {
+			return delegateExporter;
+		}
+
+		private void delegateExporterExportPOJO(Map<Object, Object> map, Object pojoClass) {
 			try {
 				Method method = delegateExporter
 						.getClass()
 						.getDeclaredMethod("exportPojo", Map.class, Object.class, String.class);
 				method.setAccessible(true);
-				method.invoke(delegateExporter, map, pojoClass, qualifiedDeclarationName);
+				method.invoke(delegateExporter, map, pojoClass, String.valueOf(pojoClass));
 			} catch (NoSuchMethodException | SecurityException | IllegalAccessException
 					| IllegalArgumentException | InvocationTargetException e) {
 				throw new RuntimeException(e);
 			}
 		}
-	}
-
-	public static class HbmExporterWrapperImpl implements HbmExporterWrapper {
-
-		private HbmExporterExtension hbmExporterExtension;
-
-		HbmExporterWrapperImpl(HbmExporterExtension hbmExporterExtension) {
-			this.hbmExporterExtension = hbmExporterExtension;
-		}
-
-		@Override
-		public Object getWrappedObject() {
-			return hbmExporterExtension;
-		}
-
-		@Override public void start() { hbmExporterExtension.start(); }
-
-		@Override
-		public File getOutputDirectory() {
-			return (File) hbmExporterExtension.getProperties().get(ExporterConstants.DESTINATION_FOLDER);
-		}
-
-		@Override
-		public void setOutputDirectory(File f) {
-			hbmExporterExtension.getProperties().put(ExporterConstants.DESTINATION_FOLDER, f);
-		}
-
-		@Override
-		public void exportPOJO(Map<Object, Object> map, Object pojoClass) {
-			hbmExporterExtension.exportPOJO(map, (POJOClass) pojoClass);
-		}
-
-		@Override
-		public void setExportPOJODelegate(Object delegate) {
-			hbmExporterExtension.delegateExporter = delegate;
-		}
-
 	}
 
 }

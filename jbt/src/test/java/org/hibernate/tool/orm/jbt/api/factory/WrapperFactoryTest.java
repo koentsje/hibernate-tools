@@ -26,13 +26,11 @@ import org.hibernate.boot.Metadata;
 import org.hibernate.boot.model.naming.ImplicitNamingStrategyJpaCompliantImpl;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.tool.api.export.ArtifactCollector;
-import org.hibernate.tool.api.export.ExporterConstants;
 import org.hibernate.tool.api.reveng.RevengSettings;
 import org.hibernate.tool.api.reveng.RevengStrategy;
+import org.hibernate.tool.hbm2x.Hbm2DDLExporter;
 import org.hibernate.tool.ide.completion.HQLCodeAssist;
 import org.hibernate.tool.ide.completion.HQLCompletionProposal;
-import org.hibernate.tool.internal.export.ddl.DdlExporter;
-import org.hibernate.tool.internal.export.hbm.HbmExporter;
 import org.hibernate.tool.internal.reveng.strategy.DefaultStrategy;
 import org.hibernate.tool.internal.reveng.strategy.DelegatingStrategy;
 import org.hibernate.tool.internal.reveng.strategy.OverrideRepository;
@@ -41,6 +39,7 @@ import org.hibernate.tool.orm.jbt.api.wrp.ColumnWrapper;
 import org.hibernate.tool.orm.jbt.api.wrp.ConfigurationWrapper;
 import org.hibernate.tool.orm.jbt.api.wrp.DatabaseReaderWrapper;
 import org.hibernate.tool.orm.jbt.api.wrp.ExporterWrapper;
+import org.hibernate.tool.orm.jbt.api.wrp.HbmExporterWrapper;
 import org.hibernate.tool.orm.jbt.api.wrp.HqlCodeAssistWrapper;
 import org.hibernate.tool.orm.jbt.api.wrp.HqlCompletionProposalWrapper;
 import org.hibernate.tool.orm.jbt.api.wrp.NamingStrategyWrapper;
@@ -55,7 +54,7 @@ import org.hibernate.tool.orm.jbt.api.wrp.TableWrapper;
 import org.hibernate.tool.orm.jbt.api.wrp.TypeFactoryWrapper;
 import org.hibernate.tool.orm.jbt.api.wrp.ValueWrapper;
 import org.hibernate.tool.orm.jbt.api.wrp.Wrapper;
-import org.hibernate.tool.orm.jbt.internal.util.ConfigurationMetadataDescriptor;
+import org.hibernate.tool.orm.jbt.internal.wrp.HbmExporterWrapperFactory;
 import org.hibernate.tool.orm.jbt.internal.util.JpaConfiguration;
 import org.hibernate.tool.orm.jbt.internal.util.MetadataHelper;
 import org.hibernate.tool.orm.jbt.internal.util.NativeConfiguration;
@@ -421,26 +420,21 @@ public class WrapperFactoryTest {
 	}
 
 	@Test
-	public void testCreateHbmExporterWrapper() throws Exception {
+	public void testCreateHbmExporterWrapper() {
 		ConfigurationWrapper configuration = ConfigurationWrapperFactory.createNativeConfigurationWrapper();
 		File file = new File("foo");
 		Object hbmExporterWrapper = WrapperFactory.createHbmExporterWrapper(configuration, file);
-		HbmExporter wrappedHbmExporter = (HbmExporter)((Wrapper)hbmExporterWrapper).getWrappedObject();
 		assertNotNull(hbmExporterWrapper);
-		assertSame(file, wrappedHbmExporter.getProperties().get(ExporterConstants.OUTPUT_FILE_NAME));
-		ConfigurationMetadataDescriptor descriptor =
-				(ConfigurationMetadataDescriptor)wrappedHbmExporter
-					.getProperties()
-					.get(ExporterConstants.METADATA_DESCRIPTOR);
-		assertNotNull(descriptor);
-		Field configurationField = ConfigurationMetadataDescriptor.class.getDeclaredField("configuration");
-		configurationField.setAccessible(true);
-		assertSame(configuration.getWrappedObject(), configurationField.get(descriptor));
+		assertTrue(hbmExporterWrapper instanceof HbmExporterWrapper);
+		HbmExporterWrapperFactory.HbmExporterWrapperImpl impl =
+				(HbmExporterWrapperFactory.HbmExporterWrapperImpl) ((Wrapper) hbmExporterWrapper).getWrappedObject();
+		assertSame(file, impl.getOutputFile());
+		assertSame(configuration, impl.getConfigurationWrapper());
 	}
 
 	@Test
 	public void testCreateExporterWrapper() {
-		Object exporterWrapper = WrapperFactory.createExporterWrapper(DdlExporter.class.getName());
+		Object exporterWrapper = WrapperFactory.createExporterWrapper(Hbm2DDLExporter.class.getName());
 		assertNotNull(exporterWrapper);
 		assertTrue(exporterWrapper instanceof ExporterWrapper);
 	}

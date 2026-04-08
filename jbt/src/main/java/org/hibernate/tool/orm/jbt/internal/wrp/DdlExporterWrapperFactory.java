@@ -19,37 +19,36 @@ package org.hibernate.tool.orm.jbt.internal.wrp;
 
 import java.util.Properties;
 
-import org.hibernate.tool.api.export.ExporterConstants;
-import org.hibernate.tool.internal.export.ddl.DdlExporter;
 import org.hibernate.tool.orm.jbt.api.wrp.DdlExporterWrapper;
 
 public class DdlExporterWrapperFactory {
 
-	public static DdlExporterWrapper createDdlExporterWrapper(final DdlExporter wrappedDdlExporter) {
-		return new DdlExporterWrapperImpl(wrappedDdlExporter);
+	public static DdlExporterWrapper createDdlExporterWrapper() {
+		return new DdlExporterWrapperImpl();
 	}
 
 	public static class DdlExporterWrapperImpl implements DdlExporterWrapper {
 
-		private DdlExporter ddlExporter = null;
-
-		DdlExporterWrapperImpl(DdlExporter ddlExporter) {
-			this.ddlExporter = ddlExporter;
-		}
+		private boolean exportToDatabase = false;
+		private Properties properties = new Properties();
 
 		@Override
 		public Object getWrappedObject() {
-			return ddlExporter;
+			return this;
 		}
 
 		@Override
 		public void setExport(boolean b) {
-			ddlExporter.getProperties().put(ExporterConstants.EXPORT_TO_DATABASE, b);
+			this.exportToDatabase = b;
+		}
+
+		public boolean isExportToDatabase() {
+			return exportToDatabase;
 		}
 
 		@Override
 		public Properties getProperties() {
-			return ddlExporter.getProperties();
+			return properties;
 		}
 
 	}

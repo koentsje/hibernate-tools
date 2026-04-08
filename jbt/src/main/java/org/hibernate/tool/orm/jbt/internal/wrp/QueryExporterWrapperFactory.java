@@ -19,37 +19,40 @@ package org.hibernate.tool.orm.jbt.internal.wrp;
 
 import java.util.List;
 
-import org.hibernate.tool.api.export.ExporterConstants;
-import org.hibernate.tool.internal.export.query.QueryExporter;
 import org.hibernate.tool.orm.jbt.api.wrp.QueryExporterWrapper;
 
 public class QueryExporterWrapperFactory {
 
-	public static QueryExporterWrapper createQueryExporterWrapper(QueryExporter wrappedQueryExporter) {
-		return new QueryExporterWrapperImpl(wrappedQueryExporter);
+	public static QueryExporterWrapper createQueryExporterWrapper() {
+		return new QueryExporterWrapperImpl();
 	}
 
 	public static class QueryExporterWrapperImpl implements QueryExporterWrapper {
 
-		private QueryExporter queryExporter = null;
-
-		QueryExporterWrapperImpl(QueryExporter queryExporter) {
-			this.queryExporter = queryExporter;
-		}
+		private List<String> queries;
+		private String filename;
 
 		@Override
 		public Object getWrappedObject() {
-			return queryExporter;
+			return this;
 		}
 
 		@Override
 		public void setQueries(List<String> queries) {
-			queryExporter.setQueries(queries);
+			this.queries = queries;
 		}
 
 		@Override
 		public void setFilename(String fileName) {
-			queryExporter.getProperties().put(ExporterConstants.OUTPUT_FILE_NAME, fileName);
+			this.filename = fileName;
+		}
+
+		public List<String> getQueries() {
+			return queries;
+		}
+
+		public String getFilename() {
+			return filename;
 		}
 
 	}

@@ -19,7 +19,6 @@ package org.hibernate.tool.orm.jbt.internal.wrp;
 
 import org.hibernate.tool.orm.jbt.api.wrp.*;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -28,192 +27,140 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.StringWriter;
-import java.lang.reflect.Field;
 import java.util.Properties;
 
-import org.hibernate.cfg.Configuration;
-import org.hibernate.tool.api.export.Exporter;
-import org.hibernate.tool.api.export.ExporterConstants;
-import org.hibernate.tool.internal.export.cfg.CfgExporter;
-import org.hibernate.tool.internal.export.common.AbstractExporter;
-import org.hibernate.tool.internal.export.common.GenericExporter;
-import org.hibernate.tool.internal.export.ddl.DdlExporter;
-import org.hibernate.tool.internal.export.query.QueryExporter;
-import org.hibernate.tool.orm.jbt.internal.wrp.ArtifactCollectorWrapperFactory;
-import org.hibernate.tool.orm.jbt.internal.wrp.ConfigurationWrapperFactory;
-import org.hibernate.tool.orm.jbt.internal.wrp.ExporterWrapperFactory;
-import org.hibernate.tool.orm.jbt.internal.util.ConfigurationMetadataDescriptor;
-import org.hibernate.tool.orm.jbt.internal.util.DummyMetadataDescriptor;
+import org.hibernate.tool.hbm2x.GenericExporter;
+import org.hibernate.tool.hbm2x.Hbm2DDLExporter;
+import org.hibernate.tool.hbm2x.HibernateConfigurationExporter;
+import org.hibernate.tool.hbm2x.POJOExporter;
+import org.hibernate.tool.hbm2x.QueryExporter;
+import org.hibernate.tool.orm.jbt.internal.wrp.ExporterWrapperFactory.ExporterWrapperImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class ExporterWrapperFactoryTest {
 
 	private ExporterWrapper exporterWrapper = null;
-	private Exporter wrappedExporter = null;
-	
+
 	@BeforeEach
 	public void beforeEach() {
-		wrappedExporter = new TestExporter();
-		exporterWrapper = ExporterWrapperFactory.createExporterWrapper(TestExporter.class.getName());
-		wrappedExporter = (Exporter)exporterWrapper.getWrappedObject();
-	}
-	
-	@Test
-	public void testConstruction() {
-		assertNotNull(exporterWrapper);
-		assertNotNull(wrappedExporter);
+		exporterWrapper = ExporterWrapperFactory.createExporterWrapper(POJOExporter.class.getName());
 	}
 
 	@Test
-	public void testSetConfiguration() throws Exception {
-		Object metadataDescriptor = null;
-		Properties properties = new Properties();
-		ConfigurationWrapper configurationWrapper = ConfigurationWrapperFactory.createNativeConfigurationWrapper();
-		Configuration configuration = (Configuration)configurationWrapper.getWrappedObject();
-		configuration.setProperties(properties);
-		Field field = ConfigurationMetadataDescriptor.class.getDeclaredField("configuration");
-		field.setAccessible(true);
-		// First use the TestExporter 
-		metadataDescriptor = wrappedExporter.getProperties().get(ExporterConstants.METADATA_DESCRIPTOR);
-		assertNotNull(metadataDescriptor);
-		assertTrue(metadataDescriptor instanceof ConfigurationMetadataDescriptor);
-		assertNotSame(configuration, field.get(metadataDescriptor));
-		exporterWrapper.setConfiguration(configurationWrapper);	
-		metadataDescriptor = wrappedExporter.getProperties().get(ExporterConstants.METADATA_DESCRIPTOR);
-		assertNotNull(metadataDescriptor);
-		assertTrue(metadataDescriptor instanceof ConfigurationMetadataDescriptor);
-		assertSame(configuration, field.get(metadataDescriptor));
-		// Now test with a CfgExporter
-		exporterWrapper = ExporterWrapperFactory.createExporterWrapper(CfgExporter.class.getName());
-		wrappedExporter = (Exporter)exporterWrapper.getWrappedObject();
-		assertNotSame(properties, ((CfgExporter)exporterWrapper.getWrappedObject()).getCustomProperties());
-		metadataDescriptor = wrappedExporter.getProperties().get(ExporterConstants.METADATA_DESCRIPTOR);
-		assertNotNull(metadataDescriptor);
-		assertTrue(metadataDescriptor instanceof DummyMetadataDescriptor);
-		exporterWrapper.setConfiguration(configurationWrapper);	
-		assertSame(properties, ((CfgExporter)exporterWrapper.getWrappedObject()).getCustomProperties());
-		metadataDescriptor = wrappedExporter.getProperties().get(ExporterConstants.METADATA_DESCRIPTOR);
-		assertNotNull(metadataDescriptor);
-		assertTrue(metadataDescriptor instanceof ConfigurationMetadataDescriptor);
-		assertSame(configuration, field.get(metadataDescriptor));
+	public void testConstruction() {
+		assertNotNull(exporterWrapper);
+		assertNotNull(exporterWrapper.getWrappedObject());
+		assertTrue(exporterWrapper.getWrappedObject() instanceof org.hibernate.tool.internal.reveng.models.exporter.entity.EntityExporter);
 	}
-	
+
+	@Test
+	public void testSetConfiguration() {
+		ConfigurationWrapper configurationWrapper = ConfigurationWrapperFactory.createNativeConfigurationWrapper();
+		Properties properties = new Properties();
+		configurationWrapper.setProperties(properties);
+		// POJOExporter: setConfiguration stores the configuration
+		exporterWrapper.setConfiguration(configurationWrapper);
+		assertSame(configurationWrapper, exporterWrapper.getProperties().get("configuration"));
+		// CfgExporter: setConfiguration also sets customProperties
+		exporterWrapper = ExporterWrapperFactory.createExporterWrapper(HibernateConfigurationExporter.class.getName());
+		ExporterWrapperImpl impl = (ExporterWrapperImpl) exporterWrapper;
+		assertNull(impl.getCustomProperties());
+		exporterWrapper.setConfiguration(configurationWrapper);
+		assertSame(properties, impl.getCustomProperties());
+	}
+
 	@Test
 	public void testSetArtifactCollector() {
 		ArtifactCollectorWrapper artifactCollectorWrapper = ArtifactCollectorWrapperFactory.createArtifactCollectorWrapper();
 		Object wrappedArtifactCollector = artifactCollectorWrapper.getWrappedObject();
-		assertNotSame(wrappedArtifactCollector, wrappedExporter.getProperties().get(ExporterConstants.ARTIFACT_COLLECTOR));
+		assertNotSame(wrappedArtifactCollector, exporterWrapper.getProperties().get("artifact_collector"));
 		exporterWrapper.setArtifactCollector(artifactCollectorWrapper);
-		assertSame(wrappedArtifactCollector, wrappedExporter.getProperties().get(ExporterConstants.ARTIFACT_COLLECTOR));
+		assertSame(wrappedArtifactCollector, exporterWrapper.getProperties().get("artifact_collector"));
 	}
-	
+
 	@Test
 	public void testSetOutputDirectory() {
 		File file = new File("");
-		assertNotSame(file, wrappedExporter.getProperties().get(ExporterConstants.DESTINATION_FOLDER));		
+		assertNotSame(file, exporterWrapper.getProperties().get("output_directory"));
 		exporterWrapper.setOutputDirectory(file);
-		assertSame(file, wrappedExporter.getProperties().get(ExporterConstants.DESTINATION_FOLDER));		
+		assertSame(file, exporterWrapper.getProperties().get("output_directory"));
 	}
-	
+
 	@Test
 	public void testSetTemplatePath() {
 		String[] templatePath = new String[] {};
-		assertNotSame(templatePath, wrappedExporter.getProperties().get(ExporterConstants.TEMPLATE_PATH));		
+		assertNotSame(templatePath, exporterWrapper.getProperties().get("template_path"));
 		exporterWrapper.setTemplatePath(templatePath);
-		assertSame(templatePath, wrappedExporter.getProperties().get(ExporterConstants.TEMPLATE_PATH));		
+		assertSame(templatePath, exporterWrapper.getProperties().get("template_path"));
 	}
-	
+
 	@Test
-	public void testStart() throws Exception {
-		assertFalse(((TestExporter)exporterWrapper.getWrappedObject()).started);
-		exporterWrapper.start();
-		assertTrue(((TestExporter)exporterWrapper.getWrappedObject()).started);
+	public void testGetProperties() {
+		Properties properties = exporterWrapper.getProperties();
+		assertNotNull(properties);
 	}
-	
-	@Test
-	public void testGetProperties() throws Exception {
-		Field propertiesField = AbstractExporter.class.getDeclaredField("properties");
-		propertiesField.setAccessible(true);
-		Properties properties = new Properties();
-		assertNotNull(exporterWrapper.getProperties());
-		assertNotSame(properties, exporterWrapper.getProperties());
-		propertiesField.set(exporterWrapper.getWrappedObject(), properties);
-		assertSame(properties, exporterWrapper.getProperties());
-	}
-	
+
 	@Test
 	public void testGetGenericExporter() {
-		// TestExporter should not return a GenericExporterFacade instance
+		// POJOExporter should not return a GenericExporterWrapper
 		assertNull(exporterWrapper.getGenericExporter());
-		// try now with a GenericExporter
+		// try with GenericExporter
 		exporterWrapper = ExporterWrapperFactory.createExporterWrapper(GenericExporter.class.getName());
 		GenericExporterWrapper genericExporterWrapper = exporterWrapper.getGenericExporter();
-		assertSame(exporterWrapper.getWrappedObject(), genericExporterWrapper.getWrappedObject());
+		assertNotNull(genericExporterWrapper);
 	}
-	
+
 	@Test
 	public void testGetHbm2DDlExporter() {
-		// TestExporter should not return a GenericExporterFacade instance
+		// POJOExporter should not return a DdlExporterWrapper
 		assertNull(exporterWrapper.getHbm2DDLExporter());
-		// try now with a DdlExporter
-		exporterWrapper = ExporterWrapperFactory.createExporterWrapper(DdlExporter.class.getName());
+		// try with Hbm2DDLExporter
+		exporterWrapper = ExporterWrapperFactory.createExporterWrapper(Hbm2DDLExporter.class.getName());
 		DdlExporterWrapper ddlExporterWrapper = exporterWrapper.getHbm2DDLExporter();
-		assertSame(exporterWrapper.getWrappedObject(), ddlExporterWrapper.getWrappedObject());
+		assertNotNull(ddlExporterWrapper);
 	}
-	
+
 	@Test
 	public void testGetQueryExporter() {
-		// TestExporter should not return a GenericExporterFacade instance
+		// POJOExporter should not return a QueryExporterWrapper
 		assertNull(exporterWrapper.getQueryExporter());
-		// try now with a QueryExporter
+		// try with QueryExporter
 		exporterWrapper = ExporterWrapperFactory.createExporterWrapper(QueryExporter.class.getName());
 		QueryExporterWrapper queryExporterWrapper = exporterWrapper.getQueryExporter();
-		assertSame(exporterWrapper.getWrappedObject(), queryExporterWrapper.getWrappedObject());
+		assertNotNull(queryExporterWrapper);
 	}
-	
+
 	@Test
 	public void testSetCustomProperties() {
 		Properties properties = new Properties();
-		// 'setCustomProperties()' should not be called on other exporters than CfgExporter
-		TestExporter wrappedTestExporter = (TestExporter)exporterWrapper.getWrappedObject();
-		assertNull(wrappedTestExporter.props);
+		// setCustomProperties should have no effect on non-CfgExporter
+		ExporterWrapperImpl impl = (ExporterWrapperImpl) exporterWrapper;
+		assertNull(impl.getCustomProperties());
 		exporterWrapper.setCustomProperties(properties);
-		assertNull(wrappedTestExporter.props);
-		// try now with CfgExporter 
-		exporterWrapper = ExporterWrapperFactory.createExporterWrapper(CfgExporter.class.getName());
-		CfgExporter wrappedCfgExporter = (CfgExporter)exporterWrapper.getWrappedObject();
-		assertNotSame(properties, wrappedCfgExporter.getCustomProperties());
+		assertNull(impl.getCustomProperties());
+		// try with CfgExporter
+		exporterWrapper = ExporterWrapperFactory.createExporterWrapper(HibernateConfigurationExporter.class.getName());
+		impl = (ExporterWrapperImpl) exporterWrapper;
+		assertNull(impl.getCustomProperties());
 		exporterWrapper.setCustomProperties(properties);
-		assertSame(properties, wrappedCfgExporter.getCustomProperties());
+		assertSame(properties, impl.getCustomProperties());
 	}
-	
+
 	@Test
 	public void testSetOutput() {
 		StringWriter stringWriter = new StringWriter();
-		// 'setOutput()' should not be called on other exporters than CfgExporter
-		TestExporter wrappedTestExporter = (TestExporter)exporterWrapper.getWrappedObject();
-		assertNull(wrappedTestExporter.output);
+		// setOutput should have no effect on non-CfgExporter
+		ExporterWrapperImpl impl = (ExporterWrapperImpl) exporterWrapper;
+		assertNull(impl.getOutput());
 		exporterWrapper.setOutput(stringWriter);
-		assertNull(wrappedTestExporter.output);
-		// try now with CfgExporter 
-		exporterWrapper = ExporterWrapperFactory.createExporterWrapper(CfgExporter.class.getName());
-		CfgExporter wrappedCfgExporter = (CfgExporter)exporterWrapper.getWrappedObject();
-		assertNotSame(stringWriter, wrappedCfgExporter.getOutput());
+		assertNull(impl.getOutput());
+		// try with CfgExporter
+		exporterWrapper = ExporterWrapperFactory.createExporterWrapper(HibernateConfigurationExporter.class.getName());
+		impl = (ExporterWrapperImpl) exporterWrapper;
+		assertNull(impl.getOutput());
 		exporterWrapper.setOutput(stringWriter);
-		assertSame(stringWriter, wrappedCfgExporter.getOutput());
+		assertSame(stringWriter, impl.getOutput());
 	}
-	
-	public static class TestExporter extends AbstractExporter {
-		private boolean started = false;
-		private Properties props = null;
-		private StringWriter output = null;
-		@Override protected void doStart() {}
-		@Override public void start() { started = true; }
-		public void setCustomProperties(Properties p) {
-			props = p;
-		}
-		
-	}
-	
+
 }

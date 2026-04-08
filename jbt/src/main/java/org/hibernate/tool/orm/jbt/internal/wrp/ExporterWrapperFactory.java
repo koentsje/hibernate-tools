@@ -21,106 +21,119 @@ import java.io.File;
 import java.io.StringWriter;
 import java.util.Properties;
 
-import org.hibernate.cfg.Configuration;
-import org.hibernate.tool.api.export.Exporter;
-import org.hibernate.tool.api.export.ExporterConstants;
-import org.hibernate.tool.internal.export.cfg.CfgExporter;
-import org.hibernate.tool.internal.export.common.GenericExporter;
-import org.hibernate.tool.internal.export.ddl.DdlExporter;
-import org.hibernate.tool.internal.export.query.QueryExporter;
+import org.hibernate.tool.internal.reveng.models.exporter.cfg.CfgXmlExporter;
+import org.hibernate.tool.internal.reveng.models.exporter.ddl.DdlExporter;
+import org.hibernate.tool.internal.reveng.models.exporter.generic.GenericExporter;
+import org.hibernate.tool.internal.reveng.models.exporter.query.QueryExporter;
 import org.hibernate.tool.orm.jbt.api.wrp.ArtifactCollectorWrapper;
 import org.hibernate.tool.orm.jbt.api.wrp.ConfigurationWrapper;
 import org.hibernate.tool.orm.jbt.api.wrp.DdlExporterWrapper;
 import org.hibernate.tool.orm.jbt.api.wrp.ExporterWrapper;
 import org.hibernate.tool.orm.jbt.api.wrp.GenericExporterWrapper;
 import org.hibernate.tool.orm.jbt.api.wrp.QueryExporterWrapper;
-import org.hibernate.tool.orm.jbt.internal.util.ConfigurationMetadataDescriptor;
-import org.hibernate.tool.orm.jbt.internal.util.DummyMetadataDescriptor;
 import org.hibernate.tool.orm.jbt.internal.util.ReflectUtil;
 
 public class ExporterWrapperFactory {
 
 	public static ExporterWrapper createExporterWrapper(String className) {
-		Exporter wrappedExporter = (Exporter) ReflectUtil.createInstance(className);
-		return new ExporterWrapperImpl(wrappedExporter);
+		Object wrappedObject = ReflectUtil.createInstance(className);
+		return new ExporterWrapperImpl(wrappedObject);
 	}
 
 	public static class ExporterWrapperImpl implements ExporterWrapper {
 
-		private Exporter exporter = null;
+		private final Object wrappedObject;
+		private final Properties properties = new Properties();
+		private GenericExporterWrapper genericExporterWrapper;
+		private DdlExporterWrapper ddlExporterWrapper;
+		private QueryExporterWrapper queryExporterWrapper;
+		private Properties customProperties;
+		private StringWriter output;
 
-		ExporterWrapperImpl(Exporter exporter) {
-			this.exporter = exporter;
-			if (CfgExporter.class.isAssignableFrom(exporter.getClass())) {
-				exporter.getProperties().put(ExporterConstants.METADATA_DESCRIPTOR, new DummyMetadataDescriptor());
-			} else {
-				exporter.getProperties().put(ExporterConstants.METADATA_DESCRIPTOR,
-						new ConfigurationMetadataDescriptor(new Configuration()));
+		ExporterWrapperImpl(Object wrappedObject) {
+			this.wrappedObject = wrappedObject;
+			if (wrappedObject instanceof GenericExporter) {
+				genericExporterWrapper = GenericExporterWrapperFactory.createGenericExporterWrapper();
+			} else if (wrappedObject instanceof DdlExporter) {
+				ddlExporterWrapper = DdlExporterWrapperFactory.createDdlExporterWrapper();
+			} else if (wrappedObject instanceof QueryExporter) {
+				queryExporterWrapper = QueryExporterWrapperFactory.createQueryExporterWrapper();
 			}
 		}
 
 		@Override
 		public Object getWrappedObject() {
-			return exporter;
+			return wrappedObject;
 		}
 
 		@Override
 		public void setConfiguration(ConfigurationWrapper configuration) {
-			if (CfgExporter.class.isAssignableFrom(exporter.getClass())) {
-				((CfgExporter) exporter).setCustomProperties(configuration.getProperties());
+			if (wrappedObject instanceof CfgXmlExporter) {
+				this.customProperties = configuration.getProperties();
 			}
-			exporter.getProperties().put(ExporterConstants.METADATA_DESCRIPTOR,
-					new ConfigurationMetadataDescriptor((Configuration) configuration.getWrappedObject()));
+			properties.put("configuration", configuration);
 		}
 
 		@Override
 		public void setArtifactCollector(ArtifactCollectorWrapper artifactCollectorWrapper) {
-			exporter.getProperties().put(ExporterConstants.ARTIFACT_COLLECTOR, artifactCollectorWrapper.getWrappedObject());
+			properties.put("artifact_collector", artifactCollectorWrapper.getWrappedObject());
 		}
 
 		@Override
 		public void setOutputDirectory(File dir) {
-			exporter.getProperties().put(ExporterConstants.DESTINATION_FOLDER, dir);
+			properties.put("output_directory", dir);
 		}
 
 		@Override
 		public void setTemplatePath(String[] templatePath) {
-			exporter.getProperties().put(ExporterConstants.TEMPLATE_PATH, templatePath);
+			properties.put("template_path", templatePath);
 		}
 
-		@Override public void start() { exporter.start(); }
-		@Override public Properties getProperties() { return exporter.getProperties(); }
+		@Override
+		public void start() {
+			// TODO: bridge to new models-based exporters
+		}
+
+		@Override
+		public Properties getProperties() {
+			return properties;
+		}
 
 		@Override
 		public GenericExporterWrapper getGenericExporter() {
-			return exporter instanceof GenericExporter ?
-					GenericExporterWrapperFactory.createGenericExporterWrapper((GenericExporter) exporter) : null;
+			return genericExporterWrapper;
 		}
 
 		@Override
 		public DdlExporterWrapper getHbm2DDLExporter() {
-			return exporter instanceof DdlExporter ?
-					DdlExporterWrapperFactory.createDdlExporterWrapper((DdlExporter) exporter) : null;
+			return ddlExporterWrapper;
 		}
 
 		@Override
 		public QueryExporterWrapper getQueryExporter() {
-			return exporter instanceof QueryExporter ?
-					QueryExporterWrapperFactory.createQueryExporterWrapper((QueryExporter) exporter) : null;
+			return queryExporterWrapper;
 		}
 
 		@Override
 		public void setCustomProperties(Properties properties) {
-			if (exporter instanceof CfgExporter) {
-				((CfgExporter) exporter).setCustomProperties(properties);
+			if (wrappedObject instanceof CfgXmlExporter) {
+				this.customProperties = properties;
 			}
 		}
 
 		@Override
 		public void setOutput(StringWriter stringWriter) {
-			if (exporter instanceof CfgExporter) {
-				((CfgExporter) exporter).setOutput(stringWriter);
+			if (wrappedObject instanceof CfgXmlExporter) {
+				this.output = stringWriter;
 			}
+		}
+
+		public Properties getCustomProperties() {
+			return customProperties;
+		}
+
+		public StringWriter getOutput() {
+			return output;
 		}
 
 	}
