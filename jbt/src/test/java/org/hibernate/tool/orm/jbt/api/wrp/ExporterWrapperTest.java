@@ -17,6 +17,7 @@
  */
 package org.hibernate.tool.orm.jbt.api.wrp;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
@@ -32,11 +33,10 @@ import java.util.Properties;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.tool.api.export.Exporter;
 import org.hibernate.tool.api.export.ExporterConstants;
-import org.hibernate.tool.internal.export.cfg.CfgExporter;
-import org.hibernate.tool.internal.export.common.AbstractExporter;
-import org.hibernate.tool.internal.export.common.GenericExporter;
-import org.hibernate.tool.internal.export.ddl.DdlExporter;
-import org.hibernate.tool.internal.export.query.QueryExporter;
+import org.hibernate.tool.internal.reveng.models.exporter.cfg.CfgXmlExporter;
+import org.hibernate.tool.internal.reveng.models.exporter.generic.GenericExporter;
+import org.hibernate.tool.internal.reveng.models.exporter.ddl.DdlExporter;
+import org.hibernate.tool.internal.reveng.models.exporter.query.QueryExporter;
 import org.hibernate.tool.orm.jbt.internal.factory.ArtifactCollectorWrapperFactory;
 import org.hibernate.tool.orm.jbt.internal.factory.ConfigurationWrapperFactory;
 import org.hibernate.tool.orm.jbt.internal.factory.ExporterWrapperFactory;
@@ -82,15 +82,13 @@ public class ExporterWrapperTest {
 		assertNotNull(metadataDescriptor);
 		assertTrue(metadataDescriptor instanceof ConfigurationMetadataDescriptor);
 		assertSame(configuration, field.get(metadataDescriptor));
-		// Now test with a CfgExporter
-		exporterWrapper = ExporterWrapperFactory.createExporterWrapper(CfgExporter.class.getName());
+		// Now test with a CfgXmlExporter
+		exporterWrapper = ExporterWrapperFactory.createExporterWrapper(CfgXmlExporter.class.getName());
 		wrappedExporter = (Exporter)exporterWrapper.getWrappedObject();
-		assertNotSame(properties, ((CfgExporter)exporterWrapper.getWrappedObject()).getCustomProperties());
 		metadataDescriptor = wrappedExporter.getProperties().get(ExporterConstants.METADATA_DESCRIPTOR);
 		assertNotNull(metadataDescriptor);
 		assertTrue(metadataDescriptor instanceof DummyMetadataDescriptor);
-		exporterWrapper.setConfiguration(configurationWrapper);	
-		assertSame(properties, ((CfgExporter)exporterWrapper.getWrappedObject()).getCustomProperties());
+		exporterWrapper.setConfiguration(configurationWrapper);
 		metadataDescriptor = wrappedExporter.getProperties().get(ExporterConstants.METADATA_DESCRIPTOR);
 		assertNotNull(metadataDescriptor);
 		assertTrue(metadataDescriptor instanceof ConfigurationMetadataDescriptor);
@@ -131,13 +129,10 @@ public class ExporterWrapperTest {
 	
 	@Test
 	public void testGetProperties() throws Exception {
-		Field propertiesField = AbstractExporter.class.getDeclaredField("properties");
-		propertiesField.setAccessible(true);
-		Properties properties = new Properties();
-		assertNotNull(exporterWrapper.getProperties());
-		assertNotSame(properties, exporterWrapper.getProperties());
-		propertiesField.set(exporterWrapper.getWrappedObject(), properties);
-		assertSame(properties, exporterWrapper.getProperties());
+		Properties properties = exporterWrapper.getProperties();
+		assertNotNull(properties);
+		// Verify the wrapper delegates to the wrapped exporter's properties
+		assertSame(properties, ((Exporter)exporterWrapper.getWrappedObject()).getProperties());
 	}
 	
 	@Test
@@ -173,45 +168,44 @@ public class ExporterWrapperTest {
 	@Test
 	public void testSetCustomProperties() {
 		Properties properties = new Properties();
-		// 'setCustomProperties()' should not be called on other exporters than CfgExporter
+		properties.put("testKey", "testValue");
+		// 'setCustomProperties()' should not be called on other exporters than CfgXmlExporter
 		TestExporter wrappedTestExporter = (TestExporter)exporterWrapper.getWrappedObject();
 		assertNull(wrappedTestExporter.props);
 		exporterWrapper.setCustomProperties(properties);
 		assertNull(wrappedTestExporter.props);
-		// try now with CfgExporter 
-		exporterWrapper = ExporterWrapperFactory.createExporterWrapper(CfgExporter.class.getName());
-		CfgExporter wrappedCfgExporter = (CfgExporter)exporterWrapper.getWrappedObject();
-		assertNotSame(properties, wrappedCfgExporter.getCustomProperties());
+		// try now with CfgXmlExporter - setCustomProperties merges into exporter properties
+		exporterWrapper = ExporterWrapperFactory.createExporterWrapper(CfgXmlExporter.class.getName());
+		Exporter wrappedCfgExporter = (Exporter)exporterWrapper.getWrappedObject();
+		assertNull(wrappedCfgExporter.getProperties().get("testKey"));
 		exporterWrapper.setCustomProperties(properties);
-		assertSame(properties, wrappedCfgExporter.getCustomProperties());
+		assertEquals("testValue", wrappedCfgExporter.getProperties().get("testKey"));
 	}
 	
 	@Test
 	public void testSetOutput() {
 		StringWriter stringWriter = new StringWriter();
-		// 'setOutput()' should not be called on other exporters than CfgExporter
+		// 'setOutput()' should not be called on other exporters than CfgXmlExporter
 		TestExporter wrappedTestExporter = (TestExporter)exporterWrapper.getWrappedObject();
 		assertNull(wrappedTestExporter.output);
 		exporterWrapper.setOutput(stringWriter);
 		assertNull(wrappedTestExporter.output);
-		// try now with CfgExporter 
-		exporterWrapper = ExporterWrapperFactory.createExporterWrapper(CfgExporter.class.getName());
-		CfgExporter wrappedCfgExporter = (CfgExporter)exporterWrapper.getWrappedObject();
-		assertNotSame(stringWriter, wrappedCfgExporter.getOutput());
+		// CfgXmlExporter no longer supports setOutput(); verify it doesn't throw
+		exporterWrapper = ExporterWrapperFactory.createExporterWrapper(CfgXmlExporter.class.getName());
 		exporterWrapper.setOutput(stringWriter);
-		assertSame(stringWriter, wrappedCfgExporter.getOutput());
 	}
 	
-	public static class TestExporter extends AbstractExporter {
+	public static class TestExporter implements Exporter {
 		private boolean started = false;
 		private Properties props = null;
 		private StringWriter output = null;
-		@Override protected void doStart() {}
+		private Properties properties = new Properties();
+		@Override public Properties getProperties() { return properties; }
 		@Override public void start() { started = true; }
 		public void setCustomProperties(Properties p) {
 			props = p;
 		}
-		
+
 	}
 	
 }

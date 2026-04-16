@@ -21,7 +21,7 @@ import java.io.File;
 import java.util.Set;
 
 import org.hibernate.tool.api.export.ArtifactCollector;
-import org.hibernate.tool.internal.export.common.DefaultArtifactCollector;
+import org.hibernate.tool.api.export.DefaultArtifactCollector;
 import org.hibernate.tool.orm.jbt.api.wrp.ArtifactCollectorWrapper;
 import org.hibernate.tool.orm.jbt.internal.wrp.AbstractWrapper;
 

@@ -28,8 +28,7 @@ import java.lang.reflect.Field;
 import java.util.Properties;
 
 import org.hibernate.tool.api.export.ExporterConstants;
-import org.hibernate.tool.internal.export.common.AbstractExporter;
-import org.hibernate.tool.internal.export.ddl.DdlExporter;
+import org.hibernate.tool.internal.reveng.models.exporter.ddl.DdlExporter;
 import org.hibernate.tool.orm.jbt.internal.factory.DdlExporterWrapperFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -62,7 +61,7 @@ public class DdlExporterWrapperTest {
 
 	@Test
 	public void testGetProperties() throws Exception {
-		Field propertiesField = AbstractExporter.class.getDeclaredField("properties");
+		Field propertiesField = DdlExporter.class.getDeclaredField("exporterProperties");
 		propertiesField.setAccessible(true);
 		Properties properties = new Properties();
 		assertNotSame(properties, ddlExporterWrapper.getProperties());

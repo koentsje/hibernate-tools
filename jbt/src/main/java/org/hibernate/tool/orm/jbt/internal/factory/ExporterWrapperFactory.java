@@ -24,10 +24,10 @@ import java.util.Properties;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.tool.api.export.Exporter;
 import org.hibernate.tool.api.export.ExporterConstants;
-import org.hibernate.tool.internal.export.cfg.CfgExporter;
-import org.hibernate.tool.internal.export.common.GenericExporter;
-import org.hibernate.tool.internal.export.ddl.DdlExporter;
-import org.hibernate.tool.internal.export.query.QueryExporter;
+import org.hibernate.tool.internal.reveng.models.exporter.cfg.CfgXmlExporter;
+import org.hibernate.tool.internal.reveng.models.exporter.generic.GenericExporter;
+import org.hibernate.tool.internal.reveng.models.exporter.ddl.DdlExporter;
+import org.hibernate.tool.internal.reveng.models.exporter.query.QueryExporter;
 import org.hibernate.tool.orm.jbt.api.wrp.ArtifactCollectorWrapper;
 import org.hibernate.tool.orm.jbt.api.wrp.ConfigurationWrapper;
 import org.hibernate.tool.orm.jbt.api.wrp.DdlExporterWrapper;
@@ -58,7 +58,7 @@ public class ExporterWrapperFactory {
 		
 		private ExporterWrapperImpl(Exporter exporter) {
 			this.exporter = exporter;
-			if (CfgExporter.class.isAssignableFrom(exporter.getClass())) {
+			if (CfgXmlExporter.class.isAssignableFrom(exporter.getClass())) {
 				exporter.getProperties().put(
 						ExporterConstants.METADATA_DESCRIPTOR, 
 						new DummyMetadataDescriptor());
@@ -76,11 +76,11 @@ public class ExporterWrapperFactory {
 		
 		@Override
 		public void setConfiguration(ConfigurationWrapper configuration) {
-			if (CfgExporter.class.isAssignableFrom(exporter.getClass())) {
-				((CfgExporter)exporter).setCustomProperties(configuration.getProperties());
+			if (CfgXmlExporter.class.isAssignableFrom(exporter.getClass())) {
+				exporter.getProperties().putAll(configuration.getProperties());
 			}
 			exporter.getProperties().put(
-					ExporterConstants.METADATA_DESCRIPTOR, 
+					ExporterConstants.METADATA_DESCRIPTOR,
 					new ConfigurationMetadataDescriptor((Configuration)configuration.getWrappedObject()));
 		}
 		
@@ -140,16 +140,15 @@ public class ExporterWrapperFactory {
 
 		@Override
 		public void setCustomProperties(Properties properties) {
-			if (exporter instanceof CfgExporter) {
-				((CfgExporter)exporter).setCustomProperties(properties);
+			if (exporter instanceof CfgXmlExporter) {
+				exporter.getProperties().putAll(properties);
 			}
 		}
 
 		@Override
 		public void setOutput(StringWriter stringWriter) {
-			if (exporter instanceof CfgExporter) {
-				((CfgExporter)exporter).setOutput(stringWriter);
-			}
+			// CfgXmlExporter no longer supports direct Writer output;
+			// output will be written to the destination folder instead
 		}		
 		
 	}

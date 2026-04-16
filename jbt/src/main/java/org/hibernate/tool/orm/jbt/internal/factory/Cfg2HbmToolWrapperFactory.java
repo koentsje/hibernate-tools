@@ -17,12 +17,15 @@
  */
 package org.hibernate.tool.orm.jbt.internal.factory;
 
+import org.hibernate.mapping.Component;
+import org.hibernate.mapping.ManyToOne;
+import org.hibernate.mapping.OneToMany;
+import org.hibernate.mapping.OneToOne;
 import org.hibernate.mapping.PersistentClass;
 import org.hibernate.mapping.Property;
 import org.hibernate.mapping.SimpleValue;
+import org.hibernate.mapping.Subclass;
 import org.hibernate.mapping.Value;
-import org.hibernate.tool.internal.export.hbm.Cfg2HbmTool;
-import org.hibernate.tool.internal.export.hbm.HBMTagForValueVisitor;
 import org.hibernate.tool.orm.jbt.api.wrp.Cfg2HbmToolWrapper;
 import org.hibernate.tool.orm.jbt.api.wrp.PersistentClassWrapper;
 import org.hibernate.tool.orm.jbt.api.wrp.PropertyWrapper;
@@ -34,46 +37,67 @@ public class Cfg2HbmToolWrapperFactory {
 	public static Cfg2HbmToolWrapper createCfg2HbmToolWrapper() {
 		return new Cfg2HbmToolWrapperImpl();
 	}
-	
-	private static class Cfg2HbmToolWrapperImpl 
+
+	private static class Cfg2HbmToolWrapperImpl
 			extends AbstractWrapper
 			implements Cfg2HbmToolWrapper {
-		
-		private Cfg2HbmTool wrappedCfg2HbmTool = new Cfg2HbmTool();
-		
-		@Override 
-		public Cfg2HbmTool getWrappedObject() { 
-			return wrappedCfg2HbmTool; 
+
+		private final Object wrappedObject = new Object();
+
+		@Override
+		public Object getWrappedObject() {
+			return wrappedObject;
 		}
 
 		public String getTag(PersistentClassWrapper pcw) {
-			return wrappedCfg2HbmTool.getTag((PersistentClass)pcw.getWrappedObject());
+			PersistentClass pc = (PersistentClass)pcw.getWrappedObject();
+			if (pc instanceof Subclass) {
+				return "subclass";
+			}
+			return "class";
 		}
-		
+
 		public String getTag(PropertyWrapper pw) {
 			PersistentClassWrapper persistentClassWrapper = pw.getPersistentClass();
-			if(persistentClassWrapper!=null) {
+			if (persistentClassWrapper != null) {
 				Property v = (Property)persistentClassWrapper.getVersion().getWrappedObject();
-				if(v==pw.getWrappedObject()) {
+				if (v == pw.getWrappedObject()) {
 					Value pwv = (Value)pw.getValue().getWrappedObject();
 					if (pwv instanceof Wrapper) {
 						pwv = (Value)((Wrapper)pwv).getWrappedObject();
 					}
 					String typeName = ((SimpleValue)pwv).getTypeName();
-					if("timestamp".equals(typeName) || "dbtimestamp".equals(typeName)) {
+					if ("timestamp".equals(typeName) || "dbtimestamp".equals(typeName)) {
 						return "timestamp";
 					} else {
 						return "version";
 					}
 				}
 			}
-			String toolTag = (String)((Value)pw.getValue().getWrappedObject()).accept(HBMTagForValueVisitor.INSTANCE);
-			if ("component".equals(toolTag) && "embedded".equals(pw.getPropertyAccessorName())){
-				toolTag = "properties";
+			Value value = (Value)pw.getValue().getWrappedObject();
+			if (value instanceof Wrapper) {
+				value = (Value)((Wrapper)value).getWrappedObject();
 			}
-			return toolTag;
+			String tag = getTagForValue(value);
+			if ("component".equals(tag) && "embedded".equals(pw.getPropertyAccessorName())) {
+				tag = "properties";
+			}
+			return tag;
 		}
-		
+
+		private String getTagForValue(Value value) {
+			if (value instanceof Component) {
+				return "component";
+			} else if (value instanceof ManyToOne) {
+				return "many-to-one";
+			} else if (value instanceof OneToMany) {
+				return "one-to-many";
+			} else if (value instanceof OneToOne) {
+				return "one-to-one";
+			} else {
+				return "property";
+			}
+		}
 	}
 
 }

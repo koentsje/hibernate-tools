@@ -18,7 +18,7 @@
 package org.hibernate.tool.orm.jbt.internal.factory;
 
 import org.hibernate.tool.api.export.ExporterConstants;
-import org.hibernate.tool.internal.export.common.GenericExporter;
+import org.hibernate.tool.internal.reveng.models.exporter.generic.GenericExporter;
 import org.hibernate.tool.orm.jbt.api.wrp.GenericExporterWrapper;
 import org.hibernate.tool.orm.jbt.internal.wrp.AbstractWrapper;
 
