@@ -31,8 +31,8 @@ import org.hibernate.mapping.Table;
 import org.hibernate.tool.api.reveng.RevengDialect;
 import org.hibernate.tool.api.reveng.RevengDialectFactory;
 import org.hibernate.tool.api.reveng.RevengStrategy;
-import org.hibernate.tool.internal.reveng.models.metadata.ColumnMetadata;
-import org.hibernate.tool.internal.reveng.models.metadata.TableMetadata;
+import org.hibernate.tool.internal.descriptor.ColumnDescriptor;
+import org.hibernate.tool.internal.descriptor.TableDescriptor;
 import org.hibernate.tool.internal.reader.ModelsDatabaseSchemaReader;
 import org.hibernate.tool.orm.jbt.api.wrp.DatabaseReaderWrapper;
 import org.hibernate.tool.orm.jbt.api.wrp.RevengStrategyWrapper;
@@ -76,11 +76,11 @@ public class DatabaseReaderWrapperFactory {
 									org.hibernate.engine.jdbc.connections.spi.ConnectionProvider.class));
 					String defaultCatalog = (String) properties.get(AvailableSettings.DEFAULT_CATALOG);
 					String defaultSchema = (String) properties.get(AvailableSettings.DEFAULT_SCHEMA);
-					List<TableMetadata> tables = ModelsDatabaseSchemaReader
+					List<TableDescriptor> tables = ModelsDatabaseSchemaReader
 							.create(revengDialect, revengStrategy, defaultCatalog, defaultSchema)
 							.readSchema();
 					Map<String, List<TableWrapper>> result = new HashMap<>();
-					for (TableMetadata table : tables) {
+					for (TableDescriptor table : tables) {
 						String qualifier = "";
 						if (table.getCatalog() != null) {
 							qualifier += table.getCatalog();
@@ -96,7 +96,7 @@ public class DatabaseReaderWrapperFactory {
 						Table wrappedTable = (Table) tw.getWrappedObject();
 						wrappedTable.setCatalog(table.getCatalog());
 						wrappedTable.setSchema(table.getSchema());
-						for (ColumnMetadata column : table.getColumns()) {
+						for (ColumnDescriptor column : table.getColumns()) {
 							tw.addColumn(ColumnWrapperFactory.createColumnWrapper(column.getColumnName()));
 						}
 						list.add(tw);
