@@ -33,7 +33,7 @@ import org.hibernate.tool.api.reveng.RevengDialectFactory;
 import org.hibernate.tool.api.reveng.RevengStrategy;
 import org.hibernate.tool.internal.reveng.models.metadata.ColumnMetadata;
 import org.hibernate.tool.internal.reveng.models.metadata.TableMetadata;
-import org.hibernate.tool.internal.reveng.models.reader.ModelsDatabaseSchemaReader;
+import org.hibernate.tool.internal.reader.ModelsDatabaseSchemaReader;
 import org.hibernate.tool.orm.jbt.api.wrp.DatabaseReaderWrapper;
 import org.hibernate.tool.orm.jbt.api.wrp.RevengStrategyWrapper;
 import org.hibernate.tool.orm.jbt.api.wrp.TableWrapper;
