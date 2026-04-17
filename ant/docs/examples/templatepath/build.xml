@@ -24,7 +24,7 @@
           destdir="generated"
           templatepath="templates">
       <jdbcconfiguration propertyfile="../common/hibernate.properties" />
-      <!-- The main template file used by the Java exporter is to be found in the location 'pojo/Pojo.ftl' -->
+      <!-- The main template file used by the Java exporter is to be found in the location 'main.entity.ftl' -->
       <hbm2java/>
     </hibernatetool>
   </target>
