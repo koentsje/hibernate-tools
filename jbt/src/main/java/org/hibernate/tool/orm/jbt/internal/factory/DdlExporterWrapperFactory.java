@@ -20,7 +20,7 @@ package org.hibernate.tool.orm.jbt.internal.factory;
 import java.util.Properties;
 
 import org.hibernate.tool.api.export.ExporterConstants;
-import org.hibernate.tool.internal.reveng.models.exporter.ddl.DdlExporter;
+import org.hibernate.tool.internal.exporter.ddl.DdlExporter;
 import org.hibernate.tool.orm.jbt.api.wrp.DdlExporterWrapper;
 import org.hibernate.tool.orm.jbt.internal.wrp.AbstractWrapper;
 

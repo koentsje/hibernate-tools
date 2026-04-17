@@ -24,7 +24,7 @@ import java.util.Properties;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.tool.api.export.Exporter;
 import org.hibernate.tool.api.export.ExporterConstants;
-import org.hibernate.tool.internal.reveng.models.exporter.hbm.HbmXmlExporter;
+import org.hibernate.tool.internal.exporter.hbm.HbmXmlExporter;
 import org.hibernate.tool.orm.jbt.api.wrp.ConfigurationWrapper;
 import org.hibernate.tool.orm.jbt.api.wrp.HbmExporterWrapper;
 import org.hibernate.tool.orm.jbt.internal.util.ConfigurationMetadataDescriptor;

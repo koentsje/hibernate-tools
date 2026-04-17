@@ -17,6 +17,6 @@
  */
 package org.hibernate.tool.hbm2x;
 
-import org.hibernate.tool.internal.reveng.models.exporter.entity.EntityExporter;
+import org.hibernate.tool.internal.exporter.entity.EntityExporter;
 
 public class POJOExporter extends EntityExporter {}

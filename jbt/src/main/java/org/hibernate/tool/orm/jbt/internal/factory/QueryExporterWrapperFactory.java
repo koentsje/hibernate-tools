@@ -20,7 +20,7 @@ package org.hibernate.tool.orm.jbt.internal.factory;
 import java.util.List;
 
 import org.hibernate.tool.api.export.ExporterConstants;
-import org.hibernate.tool.internal.reveng.models.exporter.query.QueryExporter;
+import org.hibernate.tool.internal.exporter.query.QueryExporter;
 import org.hibernate.tool.orm.jbt.api.wrp.QueryExporterWrapper;
 import org.hibernate.tool.orm.jbt.internal.wrp.AbstractWrapper;
 

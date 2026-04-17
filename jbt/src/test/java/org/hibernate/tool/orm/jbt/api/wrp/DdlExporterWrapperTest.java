@@ -28,7 +28,7 @@ import java.lang.reflect.Field;
 import java.util.Properties;
 
 import org.hibernate.tool.api.export.ExporterConstants;
-import org.hibernate.tool.internal.reveng.models.exporter.ddl.DdlExporter;
+import org.hibernate.tool.internal.exporter.ddl.DdlExporter;
 import org.hibernate.tool.orm.jbt.internal.factory.DdlExporterWrapperFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

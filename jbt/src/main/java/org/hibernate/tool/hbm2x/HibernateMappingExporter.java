@@ -17,6 +17,6 @@
  */
 package org.hibernate.tool.hbm2x;
 
-import org.hibernate.tool.internal.reveng.models.exporter.hbm.HbmXmlExporter;
+import org.hibernate.tool.internal.exporter.hbm.HbmXmlExporter;
 
 public class HibernateMappingExporter extends HbmXmlExporter {}

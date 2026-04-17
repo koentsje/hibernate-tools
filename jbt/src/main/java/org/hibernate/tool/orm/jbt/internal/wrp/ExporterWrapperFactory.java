@@ -21,10 +21,10 @@ import java.io.File;
 import java.io.StringWriter;
 import java.util.Properties;
 
-import org.hibernate.tool.internal.reveng.models.exporter.cfg.CfgXmlExporter;
-import org.hibernate.tool.internal.reveng.models.exporter.ddl.DdlExporter;
-import org.hibernate.tool.internal.reveng.models.exporter.generic.GenericExporter;
-import org.hibernate.tool.internal.reveng.models.exporter.query.QueryExporter;
+import org.hibernate.tool.internal.exporter.cfg.CfgXmlExporter;
+import org.hibernate.tool.internal.exporter.ddl.DdlExporter;
+import org.hibernate.tool.internal.exporter.generic.GenericExporter;
+import org.hibernate.tool.internal.exporter.query.QueryExporter;
 import org.hibernate.tool.orm.jbt.api.wrp.ArtifactCollectorWrapper;
 import org.hibernate.tool.orm.jbt.api.wrp.ConfigurationWrapper;
 import org.hibernate.tool.orm.jbt.api.wrp.DdlExporterWrapper;

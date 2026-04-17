@@ -17,4 +17,4 @@
  */
 package org.hibernate.tool.hbm2x;
 
-public class QueryExporter extends org.hibernate.tool.internal.reveng.models.exporter.query.QueryExporter {}
+public class QueryExporter extends org.hibernate.tool.internal.exporter.query.QueryExporter {}

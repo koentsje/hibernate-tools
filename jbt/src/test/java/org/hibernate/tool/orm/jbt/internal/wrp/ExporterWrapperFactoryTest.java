@@ -51,7 +51,7 @@ public class ExporterWrapperFactoryTest {
 	public void testConstruction() {
 		assertNotNull(exporterWrapper);
 		assertNotNull(exporterWrapper.getWrappedObject());
-		assertTrue(exporterWrapper.getWrappedObject() instanceof org.hibernate.tool.internal.reveng.models.exporter.entity.EntityExporter);
+		assertTrue(exporterWrapper.getWrappedObject() instanceof org.hibernate.tool.internal.exporter.entity.EntityExporter);
 	}
 
 	@Test

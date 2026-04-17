@@ -17,4 +17,4 @@
  */
 package org.hibernate.tool.hbm2x;
 
-public class GenericExporter extends org.hibernate.tool.internal.reveng.models.exporter.generic.GenericExporter {}
+public class GenericExporter extends org.hibernate.tool.internal.exporter.generic.GenericExporter {}

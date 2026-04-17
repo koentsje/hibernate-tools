@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.hibernate.tool.api.export.ExporterConstants;
-import org.hibernate.tool.internal.reveng.models.exporter.generic.GenericExporter;
+import org.hibernate.tool.internal.exporter.generic.GenericExporter;
 import org.hibernate.tool.orm.jbt.internal.factory.GenericExporterWrapperFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
