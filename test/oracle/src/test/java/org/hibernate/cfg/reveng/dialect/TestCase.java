@@ -30,7 +30,7 @@ import org.hibernate.cfg.Environment;
 import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.hibernate.service.ServiceRegistry;
 import org.hibernate.tool.api.reveng.RevengDialect;
-import org.hibernate.tool.internal.reveng.dialect.OracleMetaDataDialect;
+import org.hibernate.tool.internal.reveng.dialect.OracleRevengDialect;
 import org.hibernate.tools.test.util.JdbcUtil;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,7 +56,7 @@ public class TestCase {
 
     @Test
     public void testColumnTypeSizes() {
-        RevengDialect dialect = configureOracleMetaDataDialect();
+        RevengDialect dialect = configureOracleRevengDialect();
 
         assertSqlTypeLengths(dialect, "a_varchar2_char", "VARCHAR2", 10, 0);
         assertSqlTypeLengths(dialect, "a_varchar2_byte", "VARCHAR2", 10, 0);
@@ -72,8 +72,8 @@ public class TestCase {
         assertSqlTypeLengths(dialect, "a_float", "FLOAT", 10, 0);
     }
 
-    private RevengDialect configureOracleMetaDataDialect() {
-        RevengDialect dialect = new OracleMetaDataDialect();
+    private RevengDialect configureOracleRevengDialect() {
+        RevengDialect dialect = new OracleRevengDialect();
         ConnectionProvider connectionProvider = serviceRegistry.getService(ConnectionProvider.class);
         dialect.configure(connectionProvider);
         return dialect;
