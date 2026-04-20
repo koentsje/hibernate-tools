@@ -30,7 +30,7 @@ import org.hibernate.cfg.Environment;
 import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.hibernate.service.ServiceRegistry;
 import org.hibernate.tool.api.reveng.RevengDialect;
-import org.hibernate.tool.internal.reveng.dialect.OracleRevengDialect;
+import org.hibernate.tool.internal.dialect.OracleRevengDialect;
 import org.hibernate.tools.test.util.JdbcUtil;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

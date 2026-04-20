@@ -25,9 +25,9 @@ import java.util.List;
 
 import org.hibernate.tool.api.reveng.RevengStrategy;
 import org.hibernate.tool.api.reveng.TableIdentifier;
-import org.hibernate.tool.internal.reveng.strategy.DelegatingStrategy;
-import org.hibernate.tool.internal.reveng.strategy.OverrideRepository;
-import org.hibernate.tool.internal.reveng.strategy.TableFilter;
+import org.hibernate.tool.internal.strategy.DelegatingStrategy;
+import org.hibernate.tool.internal.strategy.OverrideRepository;
+import org.hibernate.tool.internal.strategy.TableFilter;
 import org.hibernate.tool.orm.jbt.internal.factory.OverrideRepositoryWrapperFactory;
 import org.hibernate.tool.orm.jbt.internal.factory.RevengStrategyWrapperFactory;
 import org.hibernate.tool.orm.jbt.internal.factory.TableFilterWrapperFactory;

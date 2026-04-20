@@ -17,7 +17,7 @@
  */
 package org.hibernate.tool.orm.jbt.internal.wrp;
 
-import org.hibernate.tool.internal.reveng.strategy.TableFilter;
+import org.hibernate.tool.internal.strategy.TableFilter;
 import org.hibernate.tool.orm.jbt.api.wrp.TableFilterWrapper;
 
 public class TableFilterWrapperFactory {
